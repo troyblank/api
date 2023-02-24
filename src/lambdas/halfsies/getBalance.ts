@@ -1,21 +1,17 @@
 import { AWSError, DynamoDB } from 'aws-sdk'
 import { APIGatewayProxyResult } from 'aws-lambda'
-import {
-    HALFSIES_DB_BALANCE_NAME,
-    RESPONSE_CODE_OK,
-    RESPONSE_CODE_SERVER_ERROR
-} from '../../constants'
+import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
 import { GetItemOutput } from 'aws-sdk/clients/dynamodb'
 
 export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolve) => {
     const result: APIGatewayProxyResult = {
         statusCode: RESPONSE_CODE_OK,
-        body: ''
+        body: 'the start'
     }
 
     const dynamoDbClient = new DynamoDB.DocumentClient()
     const dbQueryParams: DynamoDB.DocumentClient.GetItemInput = {
-        TableName: HALFSIES_DB_BALANCE_NAME,
+        TableName: process.env.balanceTableName ?? '',
         Key: { id: 0 }
     }
 
