@@ -2,16 +2,27 @@
 import { join } from 'path'
 import { Construct } from 'constructs'
 import { Stack, StackProps } from 'aws-cdk-lib'
+import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager'
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb'
 import { Runtime } from 'aws-cdk-lib/aws-lambda'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
-import { LambdaIntegration, Resource, RestApi } from 'aws-cdk-lib/aws-apigateway'
+import { LambdaIntegration, Resource, RestApi, EndpointType, DomainNameOptions } from 'aws-cdk-lib/aws-apigateway'
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources'
 import { createTable, generateNewBalanceDbItem } from '../utils'
 
 export class HalfsiesStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props)
+
+        // Custom Domain Name
+        const API_DOMAIN: string = 'api.troyblank.com'
+        const customDomainCertificateARN: string = 'arn:aws:acm:us-east-1:382713793519:certificate/700ed0de-e320-4c84-b377-9984263f610d'
+        const customDomainCertificate: ICertificate = Certificate.fromCertificateArn(this, 'domainCert', customDomainCertificateARN)
+        const customApiDomain: DomainNameOptions = {
+            domainName: API_DOMAIN,
+            certificate: customDomainCertificate,
+            endpointType: EndpointType.EDGE
+        }
 
         // Dynamo DB
         const balanceDb: Table = createTable({
@@ -49,7 +60,9 @@ export class HalfsiesStack extends Stack {
         })
 
         // API Gateway
-        const api = new RestApi(this, 'halfsiesApi')
+        const api: RestApi = new RestApi(this, 'halfsiesApi')
+
+        api.addDomainName('ApiGatewayDomain', customApiDomain)
 
         const getBalanceLambdaIntegration: LambdaIntegration = new LambdaIntegration(getBalance)
         const getBalanceLambdaResource: Resource = api.root.addResource('getBalance')
