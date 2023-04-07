@@ -15,11 +15,14 @@ export class HalfsiesStack extends Stack {
         super(scope, id, props)
 
         // Custom Domain Name
-        const API_DOMAIN: string = 'api.troyblank.com'
+        // To get a custom domain working you must
+        // 1. Get a Certificate using AWS Certificate Manager and a DNS CNAME record from your domain provider.
+        // 2. Setup your domain provider's DNS Records CNAME record to add the "API Gateway domain name" with a period at the end (found in API Gateway > Custom domain names) 
         const customDomainCertificateARN: string = 'arn:aws:acm:us-east-1:382713793519:certificate/700ed0de-e320-4c84-b377-9984263f610d'
         const customDomainCertificate: ICertificate = Certificate.fromCertificateArn(this, 'domainCert', customDomainCertificateARN)
         const customApiDomain: DomainNameOptions = {
-            domainName: API_DOMAIN,
+            domainName: 'api.troyblank.com',
+            basePath: 'halfsies',
             certificate: customDomainCertificate,
             endpointType: EndpointType.EDGE
         }
