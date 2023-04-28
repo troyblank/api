@@ -6,5 +6,5 @@ import { HalfsiesStack } from './stacks'
 
 const app = new App()
 new HalfsiesStack(app, 'Halfsies', {
-    stackName: 'Halfsies'
+	stackName: 'Halfsies',
 })

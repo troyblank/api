@@ -1,5 +1,5 @@
 [**/**.ts]
-indent_style = space
+indent_style = tab
 [**/**.js]
-indent_style = space
+indent_style = tab
 indent_size = 4
