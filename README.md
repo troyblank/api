@@ -1,6 +1,4 @@
 # AWS APIs
-[![Build Status](https://travis-ci.org/troyblank/api.svg?branch=master)](https://travis-ci.org/troyblank/api)
-[![Coverage Status](https://coveralls.io/repos/github/troyblank/api/badge.svg?branch=master)](https://coveralls.io/github/troyblank/api?branch=master)
 
 ## Global Requirements
 * awscli (`npm install aws-sdk`)
