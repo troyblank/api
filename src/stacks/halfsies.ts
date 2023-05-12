@@ -35,6 +35,13 @@ export class HalfsiesStack extends Stack {
 			type: AttributeType.NUMBER,
 		})
 
+		createTable({
+			name: 'halfsiesLog',
+			primaryKey: 'id',
+			stack: this,
+			type: AttributeType.NUMBER,
+		})
+
 		// INITIAL DB DATA
 		new AwsCustomResource(this, 'halfsiesBalanceInitData', {
 			onCreate: {
