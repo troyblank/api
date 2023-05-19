@@ -1,17 +1,17 @@
 import { RESPONSE_CODE_SERVER_ERROR } from '../../constants'
-import { handler } from './getBalance'
+import { handler } from './createHalfsie'
 
 jest.mock('aws-sdk', () => {
 	return {
 		DynamoDB: {
 			DocumentClient: jest.fn(() => ({
-				get: (_: any, callback: Function) => callback({ message: 'Something bad happened.' }, { Item: {} }),
+				put: (_: any, callback: Function) => callback({ message: 'Something bad happened.' }, { Item: {} }),
 			})),
 		},
 	}
 })
 
-describe('Lambda - Get Balance', () => {
+describe('Lambda - Create Halfsie', () => {
 
 	it('should return an error if something went wrong', async () => {
 		const expectedBody = {

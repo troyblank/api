@@ -1,22 +1,20 @@
 import { RESPONSE_CODE_OK } from '../../constants'
-import { handler } from './getBalance'
+import { handler } from './createHalfsie'
 
 jest.mock('aws-sdk', () => {
 	return {
 		DynamoDB: {
 			DocumentClient: jest.fn(() => ({
-				get: (_: any, callback: Function) => callback(null, { Item: {} }),
+				put: (_: any, callback: Function) => callback(null, { Item: { balance: 532 } }),
 			})),
 		},
 	}
 })
 
-describe('Lambda - Get Balance', () => {
+describe('Lambda - Create Halfsie', () => {
 
-	it('should return an invalid state error if data can not be fetched', async () => {
-		const expectedBody = {
-			errorMessage: undefined,
-		}
+	it('should return a balance', async () => {
+		const expectedBody = {}
 		const result = await handler()
 
 		expect(result).toStrictEqual({
