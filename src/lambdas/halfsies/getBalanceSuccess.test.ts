@@ -13,9 +13,8 @@ jest.mock('aws-sdk', () => {
 
 describe('Lambda - Get Balance', () => {
 
-	it('should return a simple example string', async () => {
+	it('should return a balance', async () => {
 		const expectedBody = {
-			errorMessage: '',
 			balance: 532,
 		}
 		const result = await handler()

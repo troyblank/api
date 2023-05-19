@@ -14,7 +14,9 @@ export class HalfsiesStack extends Stack {
 	constructor(scope: Construct, id: string, props?: StackProps) {
 		super(scope, id, props)
 
-		// Custom Domain Name
+		// ----------------------------------------------------------------------------------------
+		// CUSTOM DOMAIN NAME
+		// ----------------------------------------------------------------------------------------
 		// To get a custom domain working you must
 		// 1. Get a Certificate using AWS Certificate Manager and a DNS CNAME record from your domain provider.
 		// 2. Setup your domain provider's DNS Records CNAME record to add the "API Gateway domain name" with a period at the end (found in API Gateway > Custom domain names) 
@@ -27,7 +29,9 @@ export class HalfsiesStack extends Stack {
 			endpointType: EndpointType.EDGE,
 		}
 
-		// Dynamo DB
+		// ----------------------------------------------------------------------------------------
+		// DYNAMO DB
+		// ----------------------------------------------------------------------------------------
 		const balanceDb: Table = createTable({
 			name: 'halfsiesBalance',
 			primaryKey: 'id',
@@ -35,14 +39,14 @@ export class HalfsiesStack extends Stack {
 			type: AttributeType.NUMBER,
 		})
 
-		createTable({
+		const halfsiesLogDb = createTable({
 			name: 'halfsiesLog',
 			primaryKey: 'id',
 			stack: this,
 			type: AttributeType.NUMBER,
 		})
 
-		// INITIAL DB DATA
+		// Initial DB data
 		new AwsCustomResource(this, 'halfsiesBalanceInitData', {
 			onCreate: {
 				service: 'DynamoDB',
@@ -58,7 +62,9 @@ export class HalfsiesStack extends Stack {
 			}),
 		})
 
-		// Lambdas
+		// ----------------------------------------------------------------------------------------
+		// LAMBDAS
+		// ----------------------------------------------------------------------------------------
 		const getBalance: NodejsFunction = new NodejsFunction(this, 'getBalance', {
 			functionName: 'halfsiesGetBalance',
 			entry: join(__dirname, '../lambdas', 'halfsies', 'getBalance.ts'),
@@ -69,17 +75,35 @@ export class HalfsiesStack extends Stack {
 			},
 		})
 
-		// API Gateway
+		const createHalfsie: NodejsFunction = new NodejsFunction(this, 'createHalfsie', {
+			functionName: 'halfsiesCreateHalfsie',
+			entry: join(__dirname, '../lambdas', 'halfsies', 'createHalfsie.ts'),
+			handler: 'handler',
+			runtime: Runtime.NODEJS_18_X,
+			environment: {
+				halfsiesLogTableName: halfsiesLogDb.tableName,
+			},
+		})
+
+		// ----------------------------------------------------------------------------------------
+		// API GATEWAY
+		// ----------------------------------------------------------------------------------------
 		const api: RestApi = new RestApi(this, 'halfsiesApi')
 
 		api.addDomainName('ApiGatewayDomain', customApiDomain)
 
+		// getBalance
 		const getBalanceLambdaIntegration: LambdaIntegration = new LambdaIntegration(getBalance)
 		const getBalanceLambdaResource: Resource = api.root.addResource('getBalance')
 
 		getBalanceLambdaResource.addMethod('GET', getBalanceLambdaIntegration)
-
-		// Permissions
 		balanceDb.grantReadData(getBalance)
+
+		// create halfsie
+		const createHalfsieLambdaIntegration: LambdaIntegration = new LambdaIntegration(createHalfsie)
+		const createHalfsieLambdaResource: Resource = api.root.addResource('createHalfsie')
+
+		createHalfsieLambdaResource.addMethod('POST', createHalfsieLambdaIntegration)
+		halfsiesLogDb.grantReadWriteData(createHalfsie)
 	}
 }
