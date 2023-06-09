@@ -39,7 +39,7 @@ export class HalfsiesStack extends Stack {
 			type: AttributeType.NUMBER,
 		})
 
-		const halfsiesLogDb = createTable({
+		const logDb = createTable({
 			name: 'halfsiesLog',
 			primaryKey: 'id',
 			stack: this,
@@ -81,7 +81,7 @@ export class HalfsiesStack extends Stack {
 			handler: 'handler',
 			runtime: Runtime.NODEJS_18_X,
 			environment: {
-				halfsiesLogTableName: halfsiesLogDb.tableName,
+				halfsiesLogTableName: logDb.tableName,
 			},
 		})
 
@@ -104,6 +104,6 @@ export class HalfsiesStack extends Stack {
 		const createHalfsieLambdaResource: Resource = api.root.addResource('createHalfsie')
 
 		createHalfsieLambdaResource.addMethod('POST', createHalfsieLambdaIntegration)
-		halfsiesLogDb.grantReadWriteData(createHalfsie)
+		logDb.grantReadWriteData(createHalfsie)
 	}
 }
