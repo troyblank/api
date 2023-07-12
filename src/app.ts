@@ -2,9 +2,8 @@
 /* istanbul ignore file */
 import 'source-map-support/register'
 import { App } from 'aws-cdk-lib'
-import { HalfsiesStack } from './stacks'
+import { AuthStack, HalfsiesStack } from './stacks'
 
 const app = new App()
-new HalfsiesStack(app, 'Halfsies', {
-	stackName: 'Halfsies',
-})
+const { blankFamilyUserPool } = new AuthStack(app, 'Auth', { stackName: 'Auth' })
+new HalfsiesStack(app, 'Halfsies', { stackName: 'Halfsies', blankFamilyUserPool})

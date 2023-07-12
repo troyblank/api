@@ -15,7 +15,7 @@ describe('Lambda - Create Halfsie', () => {
 
 	it('should return an error if something went wrong', async () => {
 		const expectedBody = {
-			errorMessage: 'Something bad happened.',
+			message: 'Something bad happened.',
 		}
 		const result = await handler()
 

@@ -1,4 +1,3 @@
 /* istanbul ignore file */
-export * from './auth'
+export * from './createTable'
 export * from './halfsies'
-export * from './tables'

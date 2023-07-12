@@ -6,7 +6,7 @@ import { GetItemOutput } from 'aws-sdk/clients/dynamodb'
 export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolve) => {
 	const result: APIGatewayProxyResult = {
 		statusCode: RESPONSE_CODE_OK,
-		body: JSON.stringify({ errorMessage: 'Invalid state.', balance: 0 }),
+		body: JSON.stringify({ message: 'Invalid state.', balance: 0 }),
 	}
 
 	const dynamoDbClient = new DynamoDB.DocumentClient()
@@ -17,16 +17,16 @@ export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolv
 
 	const handleDbReturn = (error: AWSError, data: GetItemOutput) => {
 		let balance: DynamoDB.AttributeValue | undefined
-		let errorMessage: string | undefined
+		let message: string | undefined
 
 		if (error) {
 			result.statusCode = RESPONSE_CODE_SERVER_ERROR
-			errorMessage = error.message
+			message = error.message
 		} else {
 			balance = data.Item?.balance
 		}
 
-		result.body = JSON.stringify({ errorMessage, balance })
+		result.body = JSON.stringify({ message, balance })
 		resolve(result)
 	}
 

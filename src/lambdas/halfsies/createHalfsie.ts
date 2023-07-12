@@ -5,7 +5,7 @@ import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
 export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolve) => {
 	const result: APIGatewayProxyResult = {
 		statusCode: RESPONSE_CODE_OK,
-		body: JSON.stringify({ errorMessage: 'Invalid data.' }),
+		body: JSON.stringify({ message: 'Invalid data.' }),
 	}
 
 	const dynamoDbClient = new DynamoDB.DocumentClient()
@@ -22,14 +22,14 @@ export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolv
 	}
 
 	const handleDbReturn = (error: AWSError) => {
-		let errorMessage: string | undefined
+		let message: string | undefined
 
 		if (error) {
 			result.statusCode = RESPONSE_CODE_SERVER_ERROR
-			errorMessage = error.message
+			message = error.message
 		}
 
-		result.body = JSON.stringify({ errorMessage })
+		result.body = JSON.stringify({ message })
 		resolve(result)
 	}
 

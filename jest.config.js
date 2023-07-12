@@ -11,6 +11,7 @@ module.exports = {
 	},
 	collectCoverageFrom: [
 		"<rootDir>/src/**/*.ts",
+		"!<rootDir>/src/stacks/*.ts",
 	],
 	testEnvironment: 'node',
 	rootDir: './',
