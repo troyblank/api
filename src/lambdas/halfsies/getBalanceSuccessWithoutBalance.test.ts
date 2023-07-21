@@ -15,7 +15,7 @@ describe('Lambda - Get Balance', () => {
 
 	it('should return an invalid state error if data can not be fetched', async () => {
 		const expectedBody = {
-			errorMessage: undefined,
+			message: undefined,
 		}
 		const result = await handler()
 

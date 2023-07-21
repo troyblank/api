@@ -1,18 +1,29 @@
 /* istanbul ignore file */
 import { join } from 'path'
 import { Construct } from 'constructs'
-import { Stack, StackProps } from 'aws-cdk-lib'
+import { Stack } from 'aws-cdk-lib'
+import {
+	Authorizer,
+	CognitoUserPoolsAuthorizer,
+	LambdaIntegration,
+	Resource,
+	RestApi,
+	EndpointType,
+	DomainNameOptions,
+} from 'aws-cdk-lib/aws-apigateway'
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager'
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb'
 import { Runtime } from 'aws-cdk-lib/aws-lambda'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
-import { LambdaIntegration, Resource, RestApi, EndpointType, DomainNameOptions } from 'aws-cdk-lib/aws-apigateway'
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources'
-import { createTable, generateNewBalanceDbItem } from '../utils'
+import { HalfsiesStackProps } from '../types'
+import { createTable, generateNewBalanceDbItem, requiresAuthorization } from '../utils'
 
 export class HalfsiesStack extends Stack {
-	constructor(scope: Construct, id: string, props?: StackProps) {
+	constructor(scope: Construct, id: string, props: HalfsiesStackProps) {
 		super(scope, id, props)
+
+		const { blankFamilyUserPool } = props
 
 		// ----------------------------------------------------------------------------------------
 		// CUSTOM DOMAIN NAME
@@ -28,6 +39,14 @@ export class HalfsiesStack extends Stack {
 			certificate: customDomainCertificate,
 			endpointType: EndpointType.EDGE,
 		}
+
+		// ----------------------------------------------------------------------------------------
+		// AUTHORIZATION
+		// ---------------------------------------------------------------------------------------
+		const authorizer: Authorizer = new CognitoUserPoolsAuthorizer(this, 'halfsiesAuthorizer', {
+			cognitoUserPools: [ blankFamilyUserPool ],
+			identitySource: 'method.request.header.Authorization',
+		})
 
 		// ----------------------------------------------------------------------------------------
 		// DYNAMO DB
@@ -90,6 +109,7 @@ export class HalfsiesStack extends Stack {
 		// ----------------------------------------------------------------------------------------
 		const api: RestApi = new RestApi(this, 'halfsiesApi')
 
+		authorizer._attachToApi(api)
 		api.addDomainName('ApiGatewayDomain', customApiDomain)
 
 		// getBalance
@@ -103,7 +123,7 @@ export class HalfsiesStack extends Stack {
 		const createHalfsieLambdaIntegration: LambdaIntegration = new LambdaIntegration(createHalfsie)
 		const createHalfsieLambdaResource: Resource = api.root.addResource('createHalfsie')
 
-		createHalfsieLambdaResource.addMethod('POST', createHalfsieLambdaIntegration)
+		createHalfsieLambdaResource.addMethod('POST', createHalfsieLambdaIntegration, requiresAuthorization(authorizer))
 		logDb.grantReadWriteData(createHalfsie)
 	}
 }
