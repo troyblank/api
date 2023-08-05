@@ -3,6 +3,11 @@ import { Construct } from 'constructs'
 import { Duration, Stack, StackProps } from 'aws-cdk-lib'
 import { Mfa, UserPool } from 'aws-cdk-lib/aws-cognito'
 
+// ----------------------------------------------------------------------------------------
+// WHEN DELETING THIS IN CLOUD FORMATION
+// ----------------------------------------------------------------------------------------
+// 1. Be sure to remove any user pools associated with this stack.
+
 export class AuthStack extends Stack {
 	public blankFamilyUserPool: UserPool
 
@@ -18,16 +23,27 @@ export class AuthStack extends Stack {
 		this.blankFamilyUserPool = new UserPool(this, 'blankFamily', {
 			selfSignUpEnabled: false,
 			signInAliases: {
+				username: true,
 				email: true,
 			},
 			mfa: Mfa.OPTIONAL,
 			passwordPolicy: {
-				tempPasswordValidity: Duration.days(15),
+				tempPasswordValidity: Duration.days(30),
 				minLength: 8,
 				requireLowercase: false,
 				requireUppercase: false,
 				requireDigits: false,
 				requireSymbols: true,
+			},
+			standardAttributes: {
+				givenName: {
+					required: true,
+					mutable: true,
+				},
+				familyName: {
+					required: true,
+					mutable: true,
+				},
 			},
 		})
 
@@ -38,6 +54,8 @@ export class AuthStack extends Stack {
 				userPassword: true,
 				userSrp: true,
 			},
+			accessTokenValidity: Duration.days(1),
+			refreshTokenValidity: Duration.days(150),
 		})
 	}
 }
