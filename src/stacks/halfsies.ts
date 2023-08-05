@@ -19,6 +19,12 @@ import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from '
 import { HalfsiesStackProps } from '../types'
 import { createTable, generateNewBalanceDbItem, requiresAuthorization } from '../utils'
 
+// ----------------------------------------------------------------------------------------
+// WHEN DELETING THIS IN CLOUD FORMATION
+// ----------------------------------------------------------------------------------------
+// 1. Be sure to remove any DNS records made under your custom domain name on your your domain provider's. (You will have to re-add this if re-deploy).
+// 2. Be sure to remove all DB tables from DynamoDB associated with this stack.
+
 export class HalfsiesStack extends Stack {
 	constructor(scope: Construct, id: string, props: HalfsiesStackProps) {
 		super(scope, id, props)
