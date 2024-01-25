@@ -1,4 +1,4 @@
-import { Table } from 'aws-cdk-lib/aws-dynamodb'
+import { BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb'
 import { CreateTableType } from '../types'
 
 export const createTable = ({ name, primaryKey, stack, type }: CreateTableType): Table =>
@@ -7,4 +7,5 @@ export const createTable = ({ name, primaryKey, stack, type }: CreateTableType):
 			name: primaryKey,
 			type: type,
 		},
+		billingMode: BillingMode.PAY_PER_REQUEST,
 	})

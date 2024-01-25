@@ -33,7 +33,7 @@ export class AuthStack extends Stack {
 				requireLowercase: false,
 				requireUppercase: false,
 				requireDigits: false,
-				requireSymbols: true,
+				requireSymbols: false,
 			},
 			standardAttributes: {
 				givenName: {
@@ -55,7 +55,7 @@ export class AuthStack extends Stack {
 				userSrp: true,
 			},
 			accessTokenValidity: Duration.days(1),
-			refreshTokenValidity: Duration.days(150),
+			refreshTokenValidity: Duration.days(300),
 		})
 	}
 }
