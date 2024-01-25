@@ -45,6 +45,10 @@ export class AuthStack extends Stack {
 					mutable: true,
 				},
 			},
+			userInvitation: {
+				emailSubject: 'Welcome to troyblank.com Apps!',
+				emailBody: 'Hello {username}, you have been invited to join blank family applications! Your temporary password is {####}. Please complete your profile here > https://admin.troyblank.com/.',
+			},
 		})
 
 		this.blankFamilyUserPool.addClient('blankFamilyClient', {
