@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 import { Construct } from 'constructs'
 import { Duration, Stack, StackProps } from 'aws-cdk-lib'
-import { Mfa, UserPool } from 'aws-cdk-lib/aws-cognito'
+import { AccountRecovery, Mfa, UserPool } from 'aws-cdk-lib/aws-cognito'
 
 // ----------------------------------------------------------------------------------------
 // WHEN DELETING THIS IN CLOUD FORMATION
@@ -49,6 +49,7 @@ export class AuthStack extends Stack {
 				emailSubject: 'Welcome to troyblank.com Apps!',
 				emailBody: 'Hello {username}, you have been invited to join blank family applications! Your temporary password is {####}. Please complete your profile here > https://admin.troyblank.com/.',
 			},
+			accountRecovery: AccountRecovery.EMAIL_ONLY,
 		})
 
 		this.blankFamilyUserPool.addClient('blankFamilyClient', {
