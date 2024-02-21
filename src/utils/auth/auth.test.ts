@@ -6,12 +6,12 @@ describe('Auth Util', () => {
 	const chance = new Chance()
 
 	it('should return requires authorization method options', async () => {
-		const authorizerId: number = chance.natural()
-		const methodOptions: MethodOptions = requiresAuthorization({ authorizerId } as any)
+		const authorizer: any = { authorizerId: chance.guid() }
+		const methodOptions: MethodOptions = requiresAuthorization(authorizer as any)
 
 		expect(methodOptions).toStrictEqual({
 			authorizationType: AuthorizationType.COGNITO,
-			authorizer: { authorizerId },
+			authorizer,
 		})
 	})
 })

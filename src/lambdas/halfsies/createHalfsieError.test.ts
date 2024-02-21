@@ -1,4 +1,5 @@
 import { RESPONSE_CODE_SERVER_ERROR } from '../../constants'
+import { mockNewLog } from '../../mocks'
 import { handler } from './createHalfsie'
 
 jest.mock('aws-sdk', () => {
@@ -17,7 +18,7 @@ describe('Lambda - Create Halfsie', () => {
 		const expectedBody = {
 			message: 'Something bad happened.',
 		}
-		const result = await handler()
+		const result = await handler(mockNewLog())
 
 		expect(result).toStrictEqual({
 			statusCode: RESPONSE_CODE_SERVER_ERROR,

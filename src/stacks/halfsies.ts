@@ -3,13 +3,13 @@ import { join } from 'path'
 import { Construct } from 'constructs'
 import { Stack } from 'aws-cdk-lib'
 import {
-	Authorizer,
 	CognitoUserPoolsAuthorizer,
 	LambdaIntegration,
 	Resource,
 	RestApi,
 	EndpointType,
 	DomainNameOptions,
+	type Authorizer,
 } from 'aws-cdk-lib/aws-apigateway'
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager'
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb'
@@ -22,7 +22,7 @@ import { createTable, generateNewBalanceDbItem, requiresAuthorization } from '..
 // ----------------------------------------------------------------------------------------
 // WHEN DELETING THIS IN CLOUD FORMATION
 // ----------------------------------------------------------------------------------------
-// 1. Be sure to remove any DNS records made under your custom domain name on your your domain provider's. (You will have to re-add this if re-deploy).
+// 1. Be sure to remove any DNS records made under your custom domain name on your your domain provider's. (You will have to re-add this if re-deploy - your cert is on us-east-1).
 // 2. Be sure to remove all DB tables from DynamoDB associated with this stack.
 
 export class HalfsiesStack extends Stack {
@@ -35,7 +35,7 @@ export class HalfsiesStack extends Stack {
 		// CUSTOM DOMAIN NAME
 		// ----------------------------------------------------------------------------------------
 		// To get a custom domain working you must
-		// 1. Get a Certificate using AWS Certificate Manager and a DNS CNAME record from your domain provider.
+		// 1. Get a Certificate using AWS Certificate Manager (on us-east-1 ONLY) and add a DNS CNAME record from your domain provider.
 		// 2. Setup your domain provider's DNS Records CNAME record to add the "API Gateway domain name" with a period at the end (found in API Gateway > Custom domain names) 
 		const customDomainCertificateARN: string = 'arn:aws:acm:us-east-1:382713793519:certificate/700ed0de-e320-4c84-b377-9984263f610d'
 		const customDomainCertificate: ICertificate = Certificate.fromCertificateArn(this, 'domainCert', customDomainCertificateARN)
@@ -45,14 +45,6 @@ export class HalfsiesStack extends Stack {
 			certificate: customDomainCertificate,
 			endpointType: EndpointType.EDGE,
 		}
-
-		// ----------------------------------------------------------------------------------------
-		// AUTHORIZATION
-		// ---------------------------------------------------------------------------------------
-		const authorizer: Authorizer = new CognitoUserPoolsAuthorizer(this, 'halfsiesAuthorizer', {
-			cognitoUserPools: [ blankFamilyUserPool ],
-			identitySource: 'method.request.header.Authorization',
-		})
 
 		// ----------------------------------------------------------------------------------------
 		// DYNAMO DB
@@ -111,18 +103,24 @@ export class HalfsiesStack extends Stack {
 		})
 
 		// ----------------------------------------------------------------------------------------
+		// AUTHORIZATION
+		// ----------------------------------------------------------------------------------------
+		const authorizer: Authorizer = new CognitoUserPoolsAuthorizer(this, 'apiAuthorizer', {
+			cognitoUserPools: [ blankFamilyUserPool ],
+		})
+
+		// ----------------------------------------------------------------------------------------
 		// API GATEWAY
 		// ----------------------------------------------------------------------------------------
 		const api: RestApi = new RestApi(this, 'halfsiesApi')
 
-		authorizer._attachToApi(api)
 		api.addDomainName('ApiGatewayDomain', customApiDomain)
 
 		// getBalance
 		const getBalanceLambdaIntegration: LambdaIntegration = new LambdaIntegration(getBalance)
 		const getBalanceLambdaResource: Resource = api.root.addResource('getBalance')
 
-		getBalanceLambdaResource.addMethod('GET', getBalanceLambdaIntegration)
+		getBalanceLambdaResource.addMethod('GET', getBalanceLambdaIntegration, requiresAuthorization(authorizer))
 		balanceDb.grantReadData(getBalance)
 
 		// create halfsie
@@ -130,6 +128,7 @@ export class HalfsiesStack extends Stack {
 		const createHalfsieLambdaResource: Resource = api.root.addResource('createHalfsie')
 
 		createHalfsieLambdaResource.addMethod('POST', createHalfsieLambdaIntegration, requiresAuthorization(authorizer))
+
 		logDb.grantReadWriteData(createHalfsie)
 	}
 }

@@ -1,11 +1,14 @@
 import { AWSError, DynamoDB } from 'aws-sdk'
 import { APIGatewayProxyResult } from 'aws-lambda'
+import { type NewLog } from '../../types'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
 
-export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolve) => {
+export const handler = (newLog: NewLog): Promise<APIGatewayProxyResult> => new Promise((resolve) => {
+	const { amount, description } = newLog
+
 	const result: APIGatewayProxyResult = {
 		statusCode: RESPONSE_CODE_OK,
-		body: JSON.stringify({ message: 'Invalid data.' }),
+		body: JSON.stringify({ message: 'Successfully created a halfsie' }),
 	}
 
 	const dynamoDbClient = new DynamoDB.DocumentClient()
@@ -14,9 +17,9 @@ export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolv
 		Item: {
 			user: 'troy',
 			log: {
-				amount: 0,
+				amount,
 				date: new Date().toUTCString(),
-				description: 'just a test',
+				description,
 			},
 		},
 	}
