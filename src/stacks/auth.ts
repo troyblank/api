@@ -60,7 +60,7 @@ export class AuthStack extends Stack {
 				userSrp: true,
 			},
 			accessTokenValidity: Duration.days(1),
-			refreshTokenValidity: Duration.days(300),
+			refreshTokenValidity: Duration.days(360),
 		})
 	}
 }
