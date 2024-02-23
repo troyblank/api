@@ -1,5 +1,6 @@
+import { type APIGatewayProxyEvent } from 'aws-lambda'
 import { RESPONSE_CODE_OK } from '../../constants'
-import { mockNewLog } from '../../mocks'
+import { mockApiGatewayProxyEvent, mockNewLog } from '../../mocks'
 import { handler } from './createHalfsie'
 
 jest.mock('aws-sdk', () => {
@@ -14,9 +15,9 @@ jest.mock('aws-sdk', () => {
 
 describe('Lambda - Create Halfsie', () => {
 
-	it('should return a balance', async () => {
-		const expectedBody = {}
-		const result = await handler(mockNewLog())
+	it('should return a success', async () => {
+		const expectedBody = { message: 'Successfully created a halfsie.'}
+		const result = await handler(mockApiGatewayProxyEvent(mockNewLog()) as APIGatewayProxyEvent)
 
 		expect(result).toStrictEqual({
 			statusCode: RESPONSE_CODE_OK,
