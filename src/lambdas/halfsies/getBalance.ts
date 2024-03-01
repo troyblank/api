@@ -1,7 +1,8 @@
-import { AWSError, DynamoDB } from 'aws-sdk'
+import { AWSError } from 'aws-sdk'
 import { APIGatewayProxyResult } from 'aws-lambda'
+import { type DatabaseResponse } from '../../types'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
-import { GetItemOutput } from 'aws-sdk/clients/dynamodb'
+import { getBalance } from './utils'
 
 export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolve) => {
 	const result: APIGatewayProxyResult = {
@@ -9,26 +10,16 @@ export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolv
 		body: JSON.stringify({ message: 'Invalid state.', balance: 0 }),
 	}
 
-	const dynamoDbClient = new DynamoDB.DocumentClient()
-	const dbQueryParams: DynamoDB.DocumentClient.GetItemInput = {
-		TableName: process.env.balanceTableName ?? '',
-		Key: { id: 0 },
-	}
-
-	const handleDbReturn = (error: AWSError, data: GetItemOutput) => {
-		let balance: DynamoDB.AttributeValue | undefined
-		let message: string | undefined
-
-		if (error) {
+	getBalance().then(({ data: balance, isError, errorMessage }: DatabaseResponse) => {
+		if (isError) {
 			result.statusCode = RESPONSE_CODE_SERVER_ERROR
-			message = error.message
-		} else {
-			balance = data.Item?.balance
 		}
-
-		result.body = JSON.stringify({ message, balance })
+	
+		result.body = JSON.stringify({ message: errorMessage, balance })
+	}).catch((error: AWSError) => {
+		result.statusCode = RESPONSE_CODE_SERVER_ERROR
+		result.body = JSON.stringify({ message: error.toString() })
+	}).finally(() => {
 		resolve(result)
-	}
-
-	dynamoDbClient.get(dbQueryParams, handleDbReturn)
+	})
 })
