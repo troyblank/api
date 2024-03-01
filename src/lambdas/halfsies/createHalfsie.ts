@@ -1,13 +1,12 @@
-import { AWSError, DynamoDB } from 'aws-sdk'
+import { AWSError } from 'aws-sdk'
 import { type APIGatewayProxyEvent, type APIGatewayProxyResult } from 'aws-lambda'
-import { type NewLog } from '../../types'
-import { parseJwt } from '../../utils'
+import { type DatabaseResponse, type NewLog } from '../../types'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
+import { getUserName, saveLog } from './utils'
 
 export const handler = ({ body, headers }: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => new Promise((resolve) => {
-	const { amount, description }: NewLog = JSON.parse(body || '')
-	const user: string = parseJwt(headers?.Authorization?.split(' ')[1])['cognito:username']
-	const { halfsiesLogTableName = '' } = process.env
+	const newLog: NewLog = JSON.parse(body || '{}')
+	const user: string = getUserName(headers)
 	let message: string | undefined = 'Successfully created a halfsie.'
 
 	const result: APIGatewayProxyResult = {
@@ -15,28 +14,16 @@ export const handler = ({ body, headers }: APIGatewayProxyEvent): Promise<APIGat
 		body: JSON.stringify({ message }),
 	}
 
-	const dynamoDbClient = new DynamoDB.DocumentClient()
-	const now: Date = new Date()
-	const dbQueryParams: DynamoDB.DocumentClient.PutItemInput = {
-		TableName: halfsiesLogTableName,
-		Item: {
-			amount,
-			date: now.toUTCString(),
-			description,
-			id: now.getTime(),
-			user,
-		},
-	}
-
-	const handleDbReturn = (error: AWSError) => {
-		if (error) {
+	saveLog(newLog, user).then(({ isError, errorMessage }: DatabaseResponse) => {
+		if (isError) {
 			result.statusCode = RESPONSE_CODE_SERVER_ERROR
-			message = `${error.message}`
 		}
-
-		result.body = JSON.stringify({ message })
+	
+		result.body = JSON.stringify({ message: errorMessage })
+	}).catch((error: AWSError) => {
+		result.statusCode = RESPONSE_CODE_SERVER_ERROR
+		result.body = JSON.stringify({ message: error.toString() })
+	}).finally(() => {
 		resolve(result)
-	}
-
-	dynamoDbClient.put(dbQueryParams, handleDbReturn)
+	})
 })

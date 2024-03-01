@@ -1,5 +1,4 @@
-import { RESPONSE_CODE_OK } from '../../constants'
-import { handler } from './getBalance'
+import { getBalance } from './balance'
 
 jest.mock('aws-sdk', () => {
 	return {
@@ -11,17 +10,15 @@ jest.mock('aws-sdk', () => {
 	}
 })
 
-describe('Lambda - Get Balance', () => {
+describe('Balance util - success', () => {
 
 	it('should return a balance', async () => {
-		const expectedBody = {
-			balance: 532,
-		}
-		const result = await handler()
+		const result = await getBalance()
 
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_OK,
-			body: JSON.stringify(expectedBody),
+			data: 532,
+			errorMessage: undefined,
+			isError: false,
 		})
 	})
 })
