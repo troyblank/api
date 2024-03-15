@@ -98,6 +98,7 @@ export class HalfsiesStack extends Stack {
 			handler: 'handler',
 			runtime: Runtime.NODEJS_18_X,
 			environment: {
+				balanceTableName: balanceDb.tableName,
 				halfsiesLogTableName: logDb.tableName,
 			},
 		})
@@ -128,7 +129,7 @@ export class HalfsiesStack extends Stack {
 		const createHalfsieLambdaResource: Resource = api.root.addResource('createHalfsie')
 
 		createHalfsieLambdaResource.addMethod('POST', createHalfsieLambdaIntegration, requiresAuthorization(authorizer))
-
+		balanceDb.grantReadWriteData(createHalfsie)
 		logDb.grantReadWriteData(createHalfsie)
 	}
 }
