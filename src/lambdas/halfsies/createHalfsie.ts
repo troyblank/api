@@ -2,7 +2,15 @@ import { AWSError } from 'aws-sdk'
 import { type APIGatewayProxyEvent, type APIGatewayProxyResult } from 'aws-lambda'
 import { type DatabaseResponse, type NewLog } from '../../types'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
-import { getUserName, saveLog } from './utils'
+import { isALog, isUserNameTheMainUserName } from '../../utils'
+import {
+	getBalance,
+	getUserName,
+	saveLog,
+	updateBalance,
+} from './utils'
+
+
 
 export const handler = ({ body, headers }: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => new Promise((resolve) => {
 	const newLog: NewLog = JSON.parse(body || '{}')
@@ -14,16 +22,37 @@ export const handler = ({ body, headers }: APIGatewayProxyEvent): Promise<APIGat
 		body: JSON.stringify({ message }),
 	}
 
-	saveLog(newLog, user).then(({ isError, errorMessage }: DatabaseResponse) => {
-		if (isError) {
+	if (!isALog(newLog)) {
+		result.statusCode = RESPONSE_CODE_SERVER_ERROR
+		result.body = JSON.stringify({ message: 'No log given to create.' })
+		resolve(result)
+	}
+
+	getBalance().then(({ data: currentBalance, isError: isGetBalanceError, errorMessage: getBalanceErrorMessage }: DatabaseResponse) => {
+		const { amount } = newLog
+		const directionalAmount = isUserNameTheMainUserName(user) ? amount : amount * -1
+		const newBalance = currentBalance + directionalAmount
+
+		Promise.all([saveLog(newLog, user), updateBalance(newBalance)]).then(([
+			{ isError: isSaveLogError, errorMessage: saveLogErrorMessage },
+			{ data: newBalance, isError: isUpdateBalanceError, errorMessage: updateErrorMessage },
+		]: DatabaseResponse[]) => {
+			if (isGetBalanceError || isSaveLogError || isUpdateBalanceError) {
+				result.statusCode = RESPONSE_CODE_SERVER_ERROR
+				result.body = JSON.stringify({ message: getBalanceErrorMessage || saveLogErrorMessage || updateErrorMessage})
+			} else {
+				result.body = JSON.stringify({ newBalance, newLog })
+			}
+		}).catch((error: AWSError) => {
 			result.statusCode = RESPONSE_CODE_SERVER_ERROR
-		}
-	
-		result.body = JSON.stringify({ message: errorMessage })
+			result.body = JSON.stringify({ message: error.toString() })
+		}).finally(() => {
+			resolve(result)
+		})
 	}).catch((error: AWSError) => {
 		result.statusCode = RESPONSE_CODE_SERVER_ERROR
 		result.body = JSON.stringify({ message: error.toString() })
-	}).finally(() => {
+
 		resolve(result)
 	})
 })
