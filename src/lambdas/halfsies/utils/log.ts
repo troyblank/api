@@ -1,5 +1,21 @@
 import { AWSError, DynamoDB } from 'aws-sdk'
+import { type ScanOutput } from 'aws-sdk/clients/dynamodb'
 import { type DatabaseResponse, type NewLog } from '../../../types'
+
+export const getLogs = async (): Promise<DatabaseResponse> => new Promise((resolve) => {
+	const { halfsiesLogTableName = '' } = process.env
+	const dynamoDbClient = new DynamoDB.DocumentClient()
+
+	const handleDbReturn = (error: AWSError, data: ScanOutput) => {
+		resolve({
+			data: data.Items,
+			errorMessage: error?.message,
+			isError: Boolean(error), 
+		})
+	}
+
+	dynamoDbClient.scan({ TableName: halfsiesLogTableName },  handleDbReturn)
+})
 
 export const saveLog = async (log: NewLog, userName: string): Promise<DatabaseResponse> => new Promise((resolve) => {
 	const { halfsiesLogTableName = '' } = process.env

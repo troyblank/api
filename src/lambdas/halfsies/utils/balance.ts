@@ -1,5 +1,5 @@
 import { AWSError, DynamoDB } from 'aws-sdk'
-import { GetItemOutput, type DocumentClient } from 'aws-sdk/clients/dynamodb'
+import { type GetItemOutput, type DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { type DatabaseResponse } from '../../../types'
 
 export const getBalance = async (): Promise<DatabaseResponse> => new Promise((resolve) => {

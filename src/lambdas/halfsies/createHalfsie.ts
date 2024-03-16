@@ -2,15 +2,13 @@ import { AWSError } from 'aws-sdk'
 import { type APIGatewayProxyEvent, type APIGatewayProxyResult } from 'aws-lambda'
 import { type DatabaseResponse, type NewLog } from '../../types'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
-import { isALog, isUserNameTheMainUserName } from '../../utils'
+import { isALog, isUserNameTheMainUserName, pruneLogs } from '../../utils'
 import {
 	getBalance,
 	getUserName,
 	saveLog,
 	updateBalance,
 } from './utils'
-
-
 
 export const handler = ({ body, headers }: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => new Promise((resolve) => {
 	const newLog: NewLog = JSON.parse(body || '{}')
@@ -40,13 +38,27 @@ export const handler = ({ body, headers }: APIGatewayProxyEvent): Promise<APIGat
 			if (isGetBalanceError || isSaveLogError || isUpdateBalanceError) {
 				result.statusCode = RESPONSE_CODE_SERVER_ERROR
 				result.body = JSON.stringify({ message: getBalanceErrorMessage || saveLogErrorMessage || updateErrorMessage})
+			
+				resolve(result)
 			} else {
-				result.body = JSON.stringify({ newBalance, newLog })
+				pruneLogs().then(({ data: newLogs, isError: isPruneLogsError, errorMessage: pruneLogsErrorMessage }: DatabaseResponse) => {
+					if (isPruneLogsError) {
+						result.statusCode = RESPONSE_CODE_SERVER_ERROR
+						result.body = JSON.stringify({ message:  pruneLogsErrorMessage })
+					} else {
+						result.body = JSON.stringify({ newBalance, newLog, newLogs })
+					}
+				}).catch((error: AWSError) => {
+					result.statusCode = RESPONSE_CODE_SERVER_ERROR
+					result.body = JSON.stringify({ message: error.toString() })
+				}).finally(() => {
+					resolve(result)
+				})
 			}
 		}).catch((error: AWSError) => {
 			result.statusCode = RESPONSE_CODE_SERVER_ERROR
 			result.body = JSON.stringify({ message: error.toString() })
-		}).finally(() => {
+
 			resolve(result)
 		})
 	}).catch((error: AWSError) => {
