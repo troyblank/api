@@ -12,8 +12,8 @@ export const mockHalfsieLog = (overrides: any): HalfsieLog => ({
 	...overrides,
 })
 
-export const mockHalfsieLogs = (): HalfsieLog[] => {
-	const amountOfLogs: number = chance.natural({ min: 1, max: 100 })
+export const mockHalfsieLogs = (minAmount: number = 1): HalfsieLog[] => {
+	const amountOfLogs: number = chance.natural({ min: minAmount, max: minAmount + 100})
 	const uniqueIDs = chance.unique(chance.natural, amountOfLogs)
 
 

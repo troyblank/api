@@ -43,3 +43,22 @@ export const saveLog = async (log: NewLog, userName: string): Promise<DatabaseRe
 
 	dynamoDbClient.put(dbQueryParams, handleDbReturn)
 })
+
+export const deleteLog = async (id: number): Promise<DatabaseResponse> => new Promise((resolve) => {
+	const { halfsiesLogTableName = '' } = process.env
+	const dynamoDbClient = new DynamoDB.DocumentClient()
+
+	const dbQueryParams: DynamoDB.DocumentClient.DeleteItemInput = {
+		TableName: halfsiesLogTableName,
+		Key: { id },
+	}
+
+	const handleDbReturn = (error: AWSError) => {
+		resolve({
+			errorMessage: error?.message,
+			isError: Boolean(error),
+		})
+	}
+
+	dynamoDbClient.delete(dbQueryParams, handleDbReturn)
+})

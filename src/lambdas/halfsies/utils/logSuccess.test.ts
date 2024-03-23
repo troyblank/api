@@ -1,11 +1,12 @@
 import { Chance } from 'chance'
 import { mockHalfsieLogs, mockNewLog } from '../../../mocks'
-import { getLogs, saveLog } from './log'
+import { deleteLog, getLogs, saveLog } from './log'
 
 jest.mock('aws-sdk', () => {
 	return {
 		DynamoDB: {
 			DocumentClient: jest.fn(() => ({
+				delete: (_: any, callback: Function) => callback(null),
 				put: (_: any, callback: Function) => callback(null),
 				scan: (_: any, callback: Function) => callback(null, { Items: mockHalfsieLogs() }),
 			})),
@@ -24,5 +25,9 @@ describe('Log util - success', () => {
 
 	it('should save a log', async () => {
 		expect(async () => await saveLog(mockNewLog(), chance.name())).not.toThrow()
+	})
+
+	it('should delete a log', async () => {
+		expect(async () => await deleteLog(chance.natural())).not.toThrow()
 	})
 })
