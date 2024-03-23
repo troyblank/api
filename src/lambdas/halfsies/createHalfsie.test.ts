@@ -1,7 +1,9 @@
 import { Chance } from 'chance'
 import { MAIN_USER_NAME } from '../../../config'
-import { mockApiGatewayProxyEvent, mockNewLog } from '../../mocks'
+import { HalfsieLog } from '../../types'
+import { mockApiGatewayProxyEvent, mockHalfsieLogs, mockNewLog } from '../../mocks'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
+import * as utils from '../../utils'
 import {
 	getBalance,
 	getUserName,
@@ -10,11 +12,18 @@ import {
 } from './utils'
 import { handler } from './createHalfsie'
 
+jest.mock('../../utils', () => {
+	return {
+		__esModule: true,
+		...jest.requireActual('../../utils'),
+	}
+})
 jest.mock('./utils')
 
 describe('Lambda - Create Halfsie', () => {
 	const chance = new Chance()
 	const currentBalance = chance.integer({ min: -500, max: 500 })
+	const newLogs: HalfsieLog[] = mockHalfsieLogs()
 
 	beforeEach(() => {
 		jest.mocked(getBalance).mockResolvedValue({
@@ -30,6 +39,12 @@ describe('Lambda - Create Halfsie', () => {
 
 		jest.mocked(updateBalance).mockResolvedValue({
 			data: new Chance(),
+			isError: false,
+			errorMessage: undefined,
+		})
+
+		jest.spyOn(utils, 'pruneLogs').mockResolvedValue({
+			data: newLogs,
 			isError: false,
 			errorMessage: undefined,
 		})
@@ -60,6 +75,7 @@ describe('Lambda - Create Halfsie', () => {
 				{
 					newBalance,
 					newLog,
+					newLogs,
 				},
 			),
 		})
@@ -88,6 +104,7 @@ describe('Lambda - Create Halfsie', () => {
 				{
 					newBalance,
 					newLog,
+					newLogs,
 				},
 			),
 		})
@@ -178,6 +195,39 @@ describe('Lambda - Create Halfsie', () => {
 		const errorMessage = chance.sentence()
 
 		jest.mocked(updateBalance).mockResolvedValue({
+			errorMessage,
+			isError: true,
+		})
+
+		const result = await handler(mockApiGatewayProxyEvent(
+			mockNewLog(),
+		) as any)
+
+		expect(result).toStrictEqual({
+			statusCode: RESPONSE_CODE_SERVER_ERROR,
+			body: JSON.stringify({ message: errorMessage }),
+		})
+	})
+
+	it('should return an error if there is a problem using the prune logs util', async () => {
+		const errorMessage = chance.sentence()
+
+		jest.spyOn(utils, 'pruneLogs').mockRejectedValue(errorMessage)
+
+		const result = await handler(mockApiGatewayProxyEvent(
+			mockNewLog(),
+		) as any)
+
+		expect(result).toStrictEqual({
+			statusCode: RESPONSE_CODE_SERVER_ERROR,
+			body: JSON.stringify({ message: errorMessage }),
+		})
+	})
+
+	it('should return an error if there is a problem pruning the logs', async () => {
+		const errorMessage = chance.sentence()
+
+		jest.spyOn(utils, 'pruneLogs').mockResolvedValue({
 			errorMessage,
 			isError: true,
 		})
