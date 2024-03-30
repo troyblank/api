@@ -1,4 +1,5 @@
 # AWS APIs
+[![test](https://github.com/troyblank/api/actions/workflows/test.yml/badge.svg)](https://github.com/troyblank/api/actions/workflows/test.yml)
 
 ## Global Requirements
 * awscli (`yarn install aws-sdk`)
