@@ -29,7 +29,12 @@ export class HalfsiesStack extends Stack {
 	constructor(scope: Construct, id: string, props: HalfsiesStackProps) {
 		super(scope, id, props)
 
-		const { blankFamilyUserPool } = props
+		const {
+			customDomainCertificateARN,
+			customDomainName,
+			resourcePostFix = '',
+			userPool,
+		} = props
 
 		// ----------------------------------------------------------------------------------------
 		// CUSTOM DOMAIN NAME
@@ -37,10 +42,9 @@ export class HalfsiesStack extends Stack {
 		// To get a custom domain working you must
 		// 1. Get a Certificate using AWS Certificate Manager (on us-east-1 ONLY) and add a DNS CNAME record from your domain provider.
 		// 2. Setup your domain provider's DNS Records CNAME record to add the "API Gateway domain name" with a period at the end (found in API Gateway > Custom domain names) 
-		const customDomainCertificateARN: string = 'arn:aws:acm:us-east-1:382713793519:certificate/700ed0de-e320-4c84-b377-9984263f610d'
 		const customDomainCertificate: ICertificate = Certificate.fromCertificateArn(this, 'domainCert', customDomainCertificateARN)
 		const customApiDomain: DomainNameOptions = {
-			domainName: 'api.troyblank.com',
+			domainName: customDomainName,
 			basePath: 'halfsies',
 			certificate: customDomainCertificate,
 			endpointType: EndpointType.EDGE,
@@ -50,21 +54,21 @@ export class HalfsiesStack extends Stack {
 		// DYNAMO DB
 		// ----------------------------------------------------------------------------------------
 		const balanceDb: Table = createTable({
-			name: 'halfsiesBalance',
+			name: `halfsiesBalance${resourcePostFix}`,
 			primaryKey: 'id',
 			stack: this,
 			type: AttributeType.NUMBER,
 		})
 
 		const logDb = createTable({
-			name: 'halfsiesLog',
+			name: `halfsiesLog${resourcePostFix}`,
 			primaryKey: 'id',
 			stack: this,
 			type: AttributeType.NUMBER,
 		})
 
 		// Initial DB data
-		new AwsCustomResource(this, 'halfsiesBalanceInitData', {
+		new AwsCustomResource(this, `halfsiesBalanceInitData${resourcePostFix}`, {
 			onCreate: {
 				service: 'DynamoDB',
 				action: 'putItem',
@@ -83,7 +87,7 @@ export class HalfsiesStack extends Stack {
 		// LAMBDAS
 		// ----------------------------------------------------------------------------------------
 		const getBalance: NodejsFunction = new NodejsFunction(this, 'getBalance', {
-			functionName: 'halfsiesGetBalance',
+			functionName: `halfsiesGetBalance${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'getBalance.ts'),
 			handler: 'handler',
 			runtime: Runtime.NODEJS_18_X,
@@ -93,7 +97,7 @@ export class HalfsiesStack extends Stack {
 		})
 
 		const createHalfsie: NodejsFunction = new NodejsFunction(this, 'createHalfsie', {
-			functionName: 'halfsiesCreateHalfsie',
+			functionName: `halfsiesCreateHalfsie${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'createHalfsie.ts'),
 			handler: 'handler',
 			runtime: Runtime.NODEJS_18_X,
@@ -106,14 +110,14 @@ export class HalfsiesStack extends Stack {
 		// ----------------------------------------------------------------------------------------
 		// AUTHORIZATION
 		// ----------------------------------------------------------------------------------------
-		const authorizer: Authorizer = new CognitoUserPoolsAuthorizer(this, 'apiAuthorizer', {
-			cognitoUserPools: [ blankFamilyUserPool ],
+		const authorizer: Authorizer = new CognitoUserPoolsAuthorizer(this, `halfsiesApiAuthorizer${resourcePostFix}`, {
+			cognitoUserPools: [ userPool ],
 		})
 
 		// ----------------------------------------------------------------------------------------
 		// API GATEWAY
 		// ----------------------------------------------------------------------------------------
-		const api: RestApi = new RestApi(this, 'halfsiesApi')
+		const api: RestApi = new RestApi(this, `halfsiesApi${resourcePostFix}`)
 
 		api.addDomainName('ApiGatewayDomain', customApiDomain)
 

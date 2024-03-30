@@ -10,5 +10,8 @@ export type HalfsieLog = {
 }
 
 export interface HalfsiesStackProps extends StackProps {
-	blankFamilyUserPool: UserPool
+	customDomainCertificateARN: string,
+	customDomainName: string,
+	resourcePostFix: string,
+	userPool: UserPool
 }
