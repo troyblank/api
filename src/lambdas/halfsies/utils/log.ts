@@ -2,7 +2,7 @@ import { AWSError, DynamoDB } from 'aws-sdk'
 import { type ScanOutput } from 'aws-sdk/clients/dynamodb'
 import { type DatabaseResponse, type NewLog } from '../../../types'
 
-export const getLogs = async (): Promise<DatabaseResponse> => new Promise((resolve) => {
+export const getLog = async (): Promise<DatabaseResponse> => new Promise((resolve) => {
 	const { halfsiesLogTableName = '' } = process.env
 	const dynamoDbClient = new DynamoDB.DocumentClient()
 

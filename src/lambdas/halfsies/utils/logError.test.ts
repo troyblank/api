@@ -1,6 +1,6 @@
 import { Chance } from 'chance'
 import { mockNewLog } from '../../../mocks'
-import { deleteLog, getLogs, saveLog } from './log'
+import { deleteLog, getLog, saveLog } from './log'
 
 jest.mock('aws-sdk', () => {
 	return {
@@ -18,7 +18,7 @@ describe('Log util - failure', () => {
 	const chance = new Chance()
 
 	it('should allow fail when getting logs', async () => {
-		const result = await getLogs()
+		const result = await getLog()
 
 		expect(result).toStrictEqual({
 			data: undefined,

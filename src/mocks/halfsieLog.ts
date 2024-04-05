@@ -3,7 +3,7 @@ import { type HalfsieLog } from '../types'
 
 const chance = new Chance()
 
-export const mockHalfsieLog = (overrides: any): HalfsieLog => ({
+export const mockHalfsieLog = (overrides: any = {}): HalfsieLog => ({
 	amount: chance.floating({ fixed: 2 }),
 	user: chance.first(),
 	date: chance.date().toISOString(),
