@@ -86,16 +86,6 @@ export class HalfsiesStack extends Stack {
 		// ----------------------------------------------------------------------------------------
 		// LAMBDAS
 		// ----------------------------------------------------------------------------------------
-		const getBalance: NodejsFunction = new NodejsFunction(this, 'getBalance', {
-			functionName: `halfsiesGetBalance${resourcePostFix}`,
-			entry: join(__dirname, '../lambdas', 'halfsies', 'getBalance.ts'),
-			handler: 'handler',
-			runtime: Runtime.NODEJS_18_X,
-			environment: {
-				balanceTableName: balanceDb.tableName,
-			},
-		})
-
 		const createHalfsie: NodejsFunction = new NodejsFunction(this, 'createHalfsie', {
 			functionName: `halfsiesCreateHalfsie${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'createHalfsie.ts'),
@@ -107,6 +97,25 @@ export class HalfsiesStack extends Stack {
 			},
 		})
 
+		const getBalance: NodejsFunction = new NodejsFunction(this, 'getBalance', {
+			functionName: `halfsiesGetBalance${resourcePostFix}`,
+			entry: join(__dirname, '../lambdas', 'halfsies', 'getBalance.ts'),
+			handler: 'handler',
+			runtime: Runtime.NODEJS_18_X,
+			environment: {
+				balanceTableName: balanceDb.tableName,
+			},
+		})
+
+		const getLog: NodejsFunction = new NodejsFunction(this, 'getLog', {
+			functionName: `halfsiesGetLog${resourcePostFix}`,
+			entry: join(__dirname, '../lambdas', 'halfsies', 'getLog.ts'),
+			handler: 'handler',
+			runtime: Runtime.NODEJS_18_X,
+			environment: {
+				halfsiesLogTableName: logDb.tableName,
+			},
+		})
 		// ----------------------------------------------------------------------------------------
 		// AUTHORIZATION
 		// ----------------------------------------------------------------------------------------
@@ -121,13 +130,6 @@ export class HalfsiesStack extends Stack {
 
 		api.addDomainName('ApiGatewayDomain', customApiDomain)
 
-		// getBalance
-		const getBalanceLambdaIntegration: LambdaIntegration = new LambdaIntegration(getBalance)
-		const getBalanceLambdaResource: Resource = api.root.addResource('getBalance')
-
-		getBalanceLambdaResource.addMethod('GET', getBalanceLambdaIntegration, requiresAuthorization(authorizer))
-		balanceDb.grantReadData(getBalance)
-
 		// create halfsie
 		const createHalfsieLambdaIntegration: LambdaIntegration = new LambdaIntegration(createHalfsie)
 		const createHalfsieLambdaResource: Resource = api.root.addResource('createHalfsie')
@@ -135,5 +137,19 @@ export class HalfsiesStack extends Stack {
 		createHalfsieLambdaResource.addMethod('POST', createHalfsieLambdaIntegration, requiresAuthorization(authorizer))
 		balanceDb.grantReadWriteData(createHalfsie)
 		logDb.grantReadWriteData(createHalfsie)
+
+		// getBalance
+		const getBalanceLambdaIntegration: LambdaIntegration = new LambdaIntegration(getBalance)
+		const getBalanceLambdaResource: Resource = api.root.addResource('getBalance')
+
+		getBalanceLambdaResource.addMethod('GET', getBalanceLambdaIntegration, requiresAuthorization(authorizer))
+		balanceDb.grantReadData(getBalance)
+
+		// getLog
+		const getLogLambdaIntegration: LambdaIntegration = new LambdaIntegration(getLog)
+		const getLogLambdaResource: Resource = api.root.addResource('getLog')
+
+		getLogLambdaResource.addMethod('GET', getLogLambdaIntegration, requiresAuthorization(authorizer))
+		logDb.grantReadData(getLog)
 	}
 }

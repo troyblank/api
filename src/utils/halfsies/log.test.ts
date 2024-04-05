@@ -2,7 +2,7 @@ import { Chance } from 'chance'
 import { MAX_HALFSIES_LOGS } from '../../../config'
 import { type HalfsieLog } from '../../types'
 import { mockHalfsieLog, mockHalfsieLogs } from '../../mocks'
-import { deleteLog, getLogs } from '../../lambdas/halfsies/utils'
+import { deleteLog, getLog } from '../../lambdas/halfsies/utils'
 import { isALog, pruneLogs, sortLogs } from './log'
 
 jest.mock('../../../config')
@@ -53,7 +53,7 @@ describe('Log util', () => {
 	it('Should be able to prune logs.', async () => {
 		const logs: HalfsieLog[] = mockHalfsieLogs()
 
-		jest.mocked(getLogs).mockResolvedValue({ data: logs, isError: false, errorMessage: '' })
+		jest.mocked(getLog).mockResolvedValue({ data: logs, isError: false, errorMessage: '' })
 
 		const result = await pruneLogs()
 
@@ -67,7 +67,7 @@ describe('Log util', () => {
 	it('Should not be able to prune logs if there is an error getting the logs.', async () => {
 		const errorMessage: string = chance.sentence()
 
-		jest.mocked(getLogs).mockRejectedValue({ message: errorMessage })
+		jest.mocked(getLog).mockRejectedValue({ message: errorMessage })
 
 		const result = await pruneLogs()
 
@@ -80,7 +80,7 @@ describe('Log util', () => {
 	it('Should not be able to prune logs if there is an error using the get logs util.', async () => {
 		const errorMessage: string = chance.sentence()
 
-		jest.mocked(getLogs).mockResolvedValue({ data: undefined, isError: true, errorMessage })
+		jest.mocked(getLog).mockResolvedValue({ data: undefined, isError: true, errorMessage })
 
 		const result = await pruneLogs()
 
@@ -95,7 +95,7 @@ describe('Log util', () => {
 
 		const amountExpectedToDelete: number = logs.length - MAX_HALFSIES_LOGS
 
-		jest.mocked(getLogs).mockResolvedValue({ data: logs, isError: false, errorMessage: '' })
+		jest.mocked(getLog).mockResolvedValue({ data: logs, isError: false, errorMessage: '' })
 		jest.mocked(deleteLog).mockResolvedValue({ data: undefined, isError: false, errorMessage: '' })
 
 		await pruneLogs()
@@ -107,7 +107,7 @@ describe('Log util', () => {
 		const logs: HalfsieLog[] = mockHalfsieLogs(MAX_HALFSIES_LOGS + 10)
 		const errorMessage: string = chance.sentence()
 
-		jest.mocked(getLogs).mockResolvedValue({ data: logs, isError: false, errorMessage: '' })
+		jest.mocked(getLog).mockResolvedValue({ data: logs, isError: false, errorMessage: '' })
 		jest.mocked(deleteLog).mockRejectedValue({ message: errorMessage })
 
 		const result = await pruneLogs()
@@ -122,7 +122,7 @@ describe('Log util', () => {
 		const logs: HalfsieLog[] = mockHalfsieLogs(MAX_HALFSIES_LOGS + 10)
 		const errorMessage: string = chance.sentence()
 
-		jest.mocked(getLogs).mockResolvedValue({ data: logs, isError: false, errorMessage: '' })
+		jest.mocked(getLog).mockResolvedValue({ data: logs, isError: false, errorMessage: '' })
 		jest.mocked(deleteLog).mockResolvedValue({ data: undefined, isError: true, errorMessage })
 
 		const result = await pruneLogs()
