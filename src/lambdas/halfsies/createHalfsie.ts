@@ -11,13 +11,18 @@ import {
 } from './utils'
 
 export const handler = ({ body, headers }: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => new Promise((resolve) => {
+	const { accessControlAllowOrigin = '' } = process.env
 	const newLog: NewLog = JSON.parse(body || '{}')
 	const user: string = getUserName(headers)
 	let message: string | undefined = 'Successfully created a halfsie.'
 
 	const result: APIGatewayProxyResult = {
-		statusCode: RESPONSE_CODE_OK,
 		body: JSON.stringify({ message }),
+		headers: {
+			'Access-Control-Allow-Origin': accessControlAllowOrigin,
+			'Content-Type': 'application/json',
+		},
+		statusCode: RESPONSE_CODE_OK,
 	}
 
 	if (!isALog(newLog)) {

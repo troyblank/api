@@ -19,6 +19,7 @@ new HalfsiesStack(
 		customDomainCertificateARN: 'arn:aws:acm:us-east-1:382713793519:certificate/700ed0de-e320-4c84-b377-9984263f610d',
 		customDomainName: 'api.troyblank.com',
 		resourcePostFix: 'Prod',
+		accessControlAllowOrigin: 'https://halfsies.troyblank.com',
 		userPool: blankFamilyUserPool,
 		env: {
 			region: 'us-east-2',
@@ -33,6 +34,7 @@ new HalfsiesStack(
 		customDomainCertificateARN: 'arn:aws:acm:us-east-1:382713793519:certificate/74c434a7-2ad0-4477-8a50-e3b41218f85a',
 		customDomainName: 'stage-api.troyblank.com',
 		resourcePostFix: 'Stage',
+		accessControlAllowOrigin: '*',
 		userPool: blankFamilyUserPool,
 		env: {
 			region: 'us-east-2',

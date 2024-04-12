@@ -30,6 +30,7 @@ export class HalfsiesStack extends Stack {
 		super(scope, id, props)
 
 		const {
+			accessControlAllowOrigin,
 			customDomainCertificateARN,
 			customDomainName,
 			resourcePostFix = '',
@@ -92,6 +93,7 @@ export class HalfsiesStack extends Stack {
 			handler: 'handler',
 			runtime: Runtime.NODEJS_18_X,
 			environment: {
+				accessControlAllowOrigin,
 				balanceTableName: balanceDb.tableName,
 				halfsiesLogTableName: logDb.tableName,
 			},
@@ -103,6 +105,7 @@ export class HalfsiesStack extends Stack {
 			handler: 'handler',
 			runtime: Runtime.NODEJS_18_X,
 			environment: {
+				accessControlAllowOrigin,
 				balanceTableName: balanceDb.tableName,
 			},
 		})
@@ -113,6 +116,7 @@ export class HalfsiesStack extends Stack {
 			handler: 'handler',
 			runtime: Runtime.NODEJS_18_X,
 			environment: {
+				accessControlAllowOrigin,
 				halfsiesLogTableName: logDb.tableName,
 			},
 		})

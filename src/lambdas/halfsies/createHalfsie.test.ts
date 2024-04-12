@@ -70,7 +70,6 @@ describe('Lambda - Create Halfsie', () => {
 
 		expect(updateBalance).toHaveBeenCalledWith(currentBalance + newLog.amount)
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_OK,
 			body: JSON.stringify(
 				{
 					newBalance,
@@ -78,6 +77,11 @@ describe('Lambda - Create Halfsie', () => {
 					newLogs,
 				},
 			),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_OK,
 		})
 	})
 
@@ -99,7 +103,6 @@ describe('Lambda - Create Halfsie', () => {
 
 		expect(updateBalance).toHaveBeenCalledWith(currentBalance + newLog.amount)
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_OK,
 			body: JSON.stringify(
 				{
 					newBalance,
@@ -107,6 +110,11 @@ describe('Lambda - Create Halfsie', () => {
 					newLogs,
 				},
 			),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_OK,
 		})
 	})
 
@@ -123,8 +131,12 @@ describe('Lambda - Create Halfsie', () => {
 		) as any)
 
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_SERVER_ERROR,
 			body: JSON.stringify({ message: 'No log given to create.' }),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_SERVER_ERROR,
 		})
 	})
 
@@ -138,8 +150,12 @@ describe('Lambda - Create Halfsie', () => {
 		) as any)
 
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_SERVER_ERROR,
 			body: JSON.stringify({ message: errorMessage }),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_SERVER_ERROR,
 		})
 	})
 
@@ -153,8 +169,12 @@ describe('Lambda - Create Halfsie', () => {
 		) as any)
 
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_SERVER_ERROR,
 			body: JSON.stringify({ message: errorMessage }),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_SERVER_ERROR,
 		})
 	})
 
@@ -171,8 +191,12 @@ describe('Lambda - Create Halfsie', () => {
 		) as any)
 
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_SERVER_ERROR,
 			body: JSON.stringify({ message: errorMessage }),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_SERVER_ERROR,
 		})
 	})
 
@@ -186,8 +210,12 @@ describe('Lambda - Create Halfsie', () => {
 		) as any)
 
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_SERVER_ERROR,
 			body: JSON.stringify({ message: errorMessage }),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_SERVER_ERROR,
 		})
 	})
 
@@ -204,8 +232,12 @@ describe('Lambda - Create Halfsie', () => {
 		) as any)
 
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_SERVER_ERROR,
 			body: JSON.stringify({ message: errorMessage }),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_SERVER_ERROR,
 		})
 	})
 
@@ -219,8 +251,12 @@ describe('Lambda - Create Halfsie', () => {
 		) as any)
 
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_SERVER_ERROR,
 			body: JSON.stringify({ message: errorMessage }),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_SERVER_ERROR,
 		})
 	})
 
@@ -237,8 +273,12 @@ describe('Lambda - Create Halfsie', () => {
 		) as any)
 
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_SERVER_ERROR,
 			body: JSON.stringify({ message: errorMessage }),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_SERVER_ERROR,
 		})
 	})
 })
