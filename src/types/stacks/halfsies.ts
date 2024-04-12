@@ -10,6 +10,7 @@ export type HalfsieLog = {
 }
 
 export interface HalfsiesStackProps extends StackProps {
+	accessControlAllowOrigin: string,
 	customDomainCertificateARN: string,
 	customDomainName: string,
 	resourcePostFix: string,

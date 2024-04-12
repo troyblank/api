@@ -22,8 +22,12 @@ describe('Lambda - Get Balance', () => {
 		const result = await handler()
 
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_OK,
 			body: JSON.stringify(expectedBody),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_OK,
 		})
 	})
 
@@ -41,8 +45,12 @@ describe('Lambda - Get Balance', () => {
 		const result = await handler()
 
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_SERVER_ERROR,
 			body: JSON.stringify(expectedBody),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_SERVER_ERROR,
 		})
 	})
 
@@ -56,8 +64,12 @@ describe('Lambda - Get Balance', () => {
 		const result = await handler()
 
 		expect(result).toStrictEqual({
-			statusCode: RESPONSE_CODE_SERVER_ERROR,
 			body: JSON.stringify(expectedBody),
+			headers: {
+				'Access-Control-Allow-Origin': '',
+				'Content-Type': 'application/json',
+			},
+			statusCode: RESPONSE_CODE_SERVER_ERROR,
 		})
 	})
 })

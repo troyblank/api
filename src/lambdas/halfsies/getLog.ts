@@ -5,9 +5,15 @@ import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
 import { getLog } from './utils'
 
 export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolve) => {
+	const { accessControlAllowOrigin = '' } = process.env
+
 	const result: APIGatewayProxyResult = {
-		statusCode: RESPONSE_CODE_OK,
 		body: JSON.stringify({ message: 'Invalid state.', log: [] }),
+		headers: {
+			'Access-Control-Allow-Origin': accessControlAllowOrigin,
+			'Content-Type': 'application/json',
+		},
+		statusCode: RESPONSE_CODE_OK,
 	}
 
 	getLog().then(({ data: log, isError, errorMessage }: DatabaseResponse) => {
