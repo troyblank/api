@@ -27,7 +27,7 @@ export const saveLog = async (log: NewLog, userName: string): Promise<DatabaseRe
 		TableName: halfsiesLogTableName,
 		Item: {
 			amount,
-			date: now.toUTCString(),
+			date: now.toISOString(),
 			description,
 			id: now.getTime(),
 			user: userName,
