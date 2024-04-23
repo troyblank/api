@@ -50,6 +50,11 @@ describe('Log util', () => {
 		expect(sortLogs(logs)).toStrictEqual([logs[1], logs[2], logs[0]])
 	})
 
+
+	it('Should be able to sort logs that do not exist.', async () => {
+		expect(sortLogs(undefined)).toStrictEqual([])
+	})
+
 	it('Should be able to prune logs.', async () => {
 		const logs: HalfsieLog[] = mockHalfsieLogs()
 
