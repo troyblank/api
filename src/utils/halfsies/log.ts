@@ -7,7 +7,7 @@ export const isALog = (log: any): boolean => {
 	return typeof log.amount === 'number' && typeof log.description === 'string'
 }
 
-export const sortLogs = (logs: HalfsieLog[]): HalfsieLog[] => {
+export const sortLogs = (logs: HalfsieLog[] = []): HalfsieLog[] => {
 	return logs.slice().sort(({ date: dateA }: { date: string }, { date: dateB }: { date: string }) => {
 		return new Date(dateB).getTime() - new Date(dateA).getTime()
 	})

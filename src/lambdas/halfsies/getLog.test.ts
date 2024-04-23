@@ -1,6 +1,7 @@
 import { Chance } from 'chance'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
 import { mockHalfsieLog } from '../../mocks'
+import { sortLogs } from '../../utils'
 import { getLog } from './utils'
 import { handler } from './getLog'
 
@@ -22,7 +23,7 @@ describe('Lambda - Get Log', () => {
 		})
 
 		const expectedBody = {
-			log,
+			log: sortLogs(log),
 		}
 		const result = await handler()
 
