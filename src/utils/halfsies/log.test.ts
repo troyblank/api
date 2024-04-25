@@ -1,5 +1,5 @@
 import { Chance } from 'chance'
-import { MAX_HALFSIES_LOGS } from '../../../config'
+import { HALFSIES_MAX_LOGS } from '../../../config'
 import { type HalfsieLog } from '../../types'
 import { mockHalfsieLog, mockHalfsieLogs } from '../../mocks'
 import { deleteLog, getLog } from '../../lambdas/halfsies/utils'
@@ -96,9 +96,9 @@ describe('Log util', () => {
 	})
 
 	it('Should delete logs during prune if the amount of logs is over the max config value.', async () => {
-		const logs: HalfsieLog[] = mockHalfsieLogs(MAX_HALFSIES_LOGS + 10)
+		const logs: HalfsieLog[] = mockHalfsieLogs(HALFSIES_MAX_LOGS + 10)
 
-		const amountExpectedToDelete: number = logs.length - MAX_HALFSIES_LOGS
+		const amountExpectedToDelete: number = logs.length - HALFSIES_MAX_LOGS
 
 		jest.mocked(getLog).mockResolvedValue({ data: logs, isError: false, errorMessage: '' })
 		jest.mocked(deleteLog).mockResolvedValue({ data: undefined, isError: false, errorMessage: '' })
@@ -109,7 +109,7 @@ describe('Log util', () => {
 	})
 
 	it('Should not be able to prune logs if there is an error deleting any logs.', async () => {
-		const logs: HalfsieLog[] = mockHalfsieLogs(MAX_HALFSIES_LOGS + 10)
+		const logs: HalfsieLog[] = mockHalfsieLogs(HALFSIES_MAX_LOGS + 10)
 		const errorMessage: string = chance.sentence()
 
 		jest.mocked(getLog).mockResolvedValue({ data: logs, isError: false, errorMessage: '' })
@@ -124,7 +124,7 @@ describe('Log util', () => {
 	})
 
 	it('Should not be able to prune logs if there is an error using the delete log util.', async () => {
-		const logs: HalfsieLog[] = mockHalfsieLogs(MAX_HALFSIES_LOGS + 10)
+		const logs: HalfsieLog[] = mockHalfsieLogs(HALFSIES_MAX_LOGS + 10)
 		const errorMessage: string = chance.sentence()
 
 		jest.mocked(getLog).mockResolvedValue({ data: logs, isError: false, errorMessage: '' })

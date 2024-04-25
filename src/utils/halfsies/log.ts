@@ -1,5 +1,5 @@
 import { AWSError } from 'aws-sdk'
-import { MAX_HALFSIES_LOGS } from '../../../config'
+import { HALFSIES_MAX_LOGS } from '../../../config'
 import { type DatabaseResponse, type HalfsieLog } from '../../types'
 import { deleteLog, getLog } from '../../lambdas/halfsies/utils'
 
@@ -22,7 +22,7 @@ export const pruneLogs = async (): Promise<DatabaseResponse> => new Promise((res
 			})
 		}
 
-		const amountOver = logs.length - MAX_HALFSIES_LOGS
+		const amountOver = logs.length - HALFSIES_MAX_LOGS
 		const logsAwaitingDeletion: Promise<DatabaseResponse>[] = []
 		let remainingLogs: HalfsieLog[] = sortLogs(logs)
 
