@@ -13,9 +13,9 @@ import {
 } from 'aws-cdk-lib/aws-apigateway'
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager'
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb'
-import { Runtime } from 'aws-cdk-lib/aws-lambda'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources'
+import { HALFSIES_NODE_VERSION } from '../../config'
 import { HalfsiesStackProps } from '../types'
 import { createTable, generateNewBalanceDbItem, requiresAuthorization } from '../utils'
 
@@ -91,7 +91,7 @@ export class HalfsiesStack extends Stack {
 			functionName: `halfsiesCreateHalfsie${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'createHalfsie.ts'),
 			handler: 'handler',
-			runtime: Runtime.NODEJS_18_X,
+			runtime: HALFSIES_NODE_VERSION,
 			environment: {
 				accessControlAllowOrigin,
 				balanceTableName: balanceDb.tableName,
@@ -103,7 +103,7 @@ export class HalfsiesStack extends Stack {
 			functionName: `halfsiesGetBalance${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'getBalance.ts'),
 			handler: 'handler',
-			runtime: Runtime.NODEJS_18_X,
+			runtime: HALFSIES_NODE_VERSION,
 			environment: {
 				accessControlAllowOrigin,
 				balanceTableName: balanceDb.tableName,
@@ -114,7 +114,7 @@ export class HalfsiesStack extends Stack {
 			functionName: `halfsiesGetLog${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'getLog.ts'),
 			handler: 'handler',
-			runtime: Runtime.NODEJS_18_X,
+			runtime: HALFSIES_NODE_VERSION,
 			environment: {
 				accessControlAllowOrigin,
 				halfsiesLogTableName: logDb.tableName,
