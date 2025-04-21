@@ -21,7 +21,7 @@ import { createTable, requiresAuthorization } from '../utils'
 // ----------------------------------------------------------------------------------------
 // WHEN DELETING THIS IN CLOUD FORMATION
 // ----------------------------------------------------------------------------------------
-// 1. Be sure to remove any DNS records made under your custom domain name on your your domain provider's. (You will have to re-add this if re-deploy - your cert is on us-east-1).
+// 1. Be sure to remove the api DNS records made under your custom domain name on your your domain provider's. (You will have to re-add this if re-deploy - your cert is on us-east-1).
 // 2. Be sure to remove all DB tables from DynamoDB associated with this stack.
 
 export class HalfsiesStack extends Stack {
@@ -104,7 +104,8 @@ export class HalfsiesStack extends Stack {
 		})
 
 		const initializeHalfsiesDatabase: NodejsFunction = new NodejsFunction(this, 'initializeHalfsiesDatabase', {
-			functionName: `initializeHalfsiesDatabase${resourcePostFix}`,
+			functionName: `halfsiesInitializeHalfsiesDatabase${resourcePostFix}`,
+			entry: join(__dirname, '../lambdas', 'halfsies', 'initializeHalfsiesDatabase.ts'),
 			handler: 'handler',
 			runtime: HALFSIES_NODE_VERSION,
 			environment: {
