@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 import { join } from 'path'
 import { Construct } from 'constructs'
-import { Stack } from 'aws-cdk-lib'
+import { CustomResource, Stack } from 'aws-cdk-lib'
 import {
 	CognitoUserPoolsAuthorizer,
 	LambdaIntegration,
@@ -14,10 +14,9 @@ import {
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager'
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
-import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources'
 import { HALFSIES_NODE_VERSION } from '../../config'
 import { HalfsiesStackProps } from '../types'
-import { createTable, generateNewBalanceDbItem, requiresAuthorization } from '../utils'
+import { createTable, requiresAuthorization } from '../utils'
 
 // ----------------------------------------------------------------------------------------
 // WHEN DELETING THIS IN CLOUD FORMATION
@@ -67,26 +66,9 @@ export class HalfsiesStack extends Stack {
 			stack: this,
 			type: AttributeType.NUMBER,
 		})
-
-		// Initial DB data
-		new AwsCustomResource(this, `halfsiesBalanceInitData${resourcePostFix}`, {
-			onCreate: {
-				service: 'DynamoDB',
-				action: 'putItem',
-				parameters: {
-					TableName: balanceDb.tableName,
-					Item: generateNewBalanceDbItem(0),
-				},
-				physicalResourceId: PhysicalResourceId.of('initDBData'),
-			},
-			policy: AwsCustomResourcePolicy.fromSdkCalls({
-				resources: AwsCustomResourcePolicy.ANY_RESOURCE,
-			}),
-		})
-
 		// ----------------------------------------------------------------------------------------
 		// LAMBDAS
-		// ----------------------------------------------------------------------------------------
+		// ----------------------------------------------------------------------------------------		
 		const createHalfsie: NodejsFunction = new NodejsFunction(this, 'createHalfsie', {
 			functionName: `halfsiesCreateHalfsie${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'createHalfsie.ts'),
@@ -118,6 +100,15 @@ export class HalfsiesStack extends Stack {
 			environment: {
 				accessControlAllowOrigin,
 				halfsiesLogTableName: logDb.tableName,
+			},
+		})
+
+		const initializeHalfsiesDatabase: NodejsFunction = new NodejsFunction(this, 'initializeHalfsiesDatabase', {
+			functionName: `initializeHalfsiesDatabase${resourcePostFix}`,
+			handler: 'handler',
+			runtime: HALFSIES_NODE_VERSION,
+			environment: {
+				balanceTableName: balanceDb.tableName,
 			},
 		})
 		// ----------------------------------------------------------------------------------------
@@ -155,5 +146,15 @@ export class HalfsiesStack extends Stack {
 
 		getLogLambdaResource.addMethod('GET', getLogLambdaIntegration, requiresAuthorization(authorizer))
 		logDb.grantReadData(getLog)
+
+		// initialize halfsies database
+		balanceDb.grantWriteData(initializeHalfsiesDatabase)
+
+		// ----------------------------------------------------------------------------------------
+		// CUSTOM RESOURCES
+		// ---------------------------------------------------------------------------------------
+		new CustomResource(this, `initializeHalfsiesDatabase${resourcePostFix}`, {
+			serviceToken: initializeHalfsiesDatabase.functionArn,
+		})
 	}
 }
