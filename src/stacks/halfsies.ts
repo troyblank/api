@@ -16,7 +16,7 @@ import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import { HALFSIES_NODE_VERSION } from '../../config'
 import { HalfsiesStackProps } from '../types'
-import { createTable, requiresAuthorization } from '../utils'
+import { addCorsOptions, createTable, requiresAuthorization } from '../utils'
 
 // ----------------------------------------------------------------------------------------
 // WHEN DELETING THIS IN CLOUD FORMATION
@@ -133,6 +133,7 @@ export class HalfsiesStack extends Stack {
 		createHalfsieLambdaResource.addMethod('POST', createHalfsieLambdaIntegration, requiresAuthorization(authorizer))
 		balanceDb.grantReadWriteData(createHalfsie)
 		logDb.grantReadWriteData(createHalfsie)
+		addCorsOptions(createHalfsieLambdaResource, accessControlAllowOrigin)
 
 		// getBalance
 		const getBalanceLambdaIntegration: LambdaIntegration = new LambdaIntegration(getBalance)
@@ -140,6 +141,7 @@ export class HalfsiesStack extends Stack {
 
 		getBalanceLambdaResource.addMethod('GET', getBalanceLambdaIntegration, requiresAuthorization(authorizer))
 		balanceDb.grantReadData(getBalance)
+		addCorsOptions(getBalanceLambdaResource, accessControlAllowOrigin)
 
 		// getLog
 		const getLogLambdaIntegration: LambdaIntegration = new LambdaIntegration(getLog)
@@ -147,6 +149,7 @@ export class HalfsiesStack extends Stack {
 
 		getLogLambdaResource.addMethod('GET', getLogLambdaIntegration, requiresAuthorization(authorizer))
 		logDb.grantReadData(getLog)
+		addCorsOptions(getLogLambdaResource, accessControlAllowOrigin)
 
 		// initialize halfsies database
 		balanceDb.grantWriteData(initializeHalfsiesDatabase)
