@@ -1,4 +1,3 @@
-import { AWSError } from 'aws-sdk'
 import { HALFSIES_MAX_LOGS } from '../../../config'
 import { type DatabaseResponse, type HalfsieLog } from '../../types'
 import { deleteLog, getLog } from '../../lambdas/halfsies/utils'
@@ -50,15 +49,15 @@ export const pruneLogs = async (): Promise<DatabaseResponse> => new Promise((res
 				isError: false,
 				errorMessage: '',
 			})
-		}).catch((error: AWSError) => {
+		}).catch((error) => {
 			resolve({
 				errorMessage: error?.message,
 				isError: true,
 			})
 		})
-	}).catch((error: AWSError) => {
+	}).catch((error) => {
 		resolve({
-			errorMessage: error?.message,
+			errorMessage: error instanceof Error ? error.message : "Unknown error occurred",
 			isError: true,
 		})
 	})

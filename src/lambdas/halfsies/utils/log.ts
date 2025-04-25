@@ -1,64 +1,86 @@
-import { AWSError, DynamoDB } from 'aws-sdk'
-import { type ScanOutput } from 'aws-sdk/clients/dynamodb'
+import {
+	DeleteItemCommand,
+	DeleteItemCommandInput,
+	DynamoDBClient,
+} from '@aws-sdk/client-dynamodb'
+import {
+	DynamoDBDocumentClient,
+	PutCommand,
+	ScanCommand,
+	type ScanCommandOutput,
+} from "@aws-sdk/lib-dynamodb"
+import { marshall } from '@aws-sdk/util-dynamodb'
 import { type DatabaseResponse, type NewLog } from '../../../types'
 
-export const getLog = async (): Promise<DatabaseResponse> => new Promise((resolve) => {
+const dynamoDbClient = new DynamoDBClient()
+
+export const getLog = async (): Promise<DatabaseResponse> => {
+	const dynamoDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient)
 	const { halfsiesLogTableName = '' } = process.env
-	const dynamoDbClient = new DynamoDB.DocumentClient()
 
-	const handleDbReturn = (error: AWSError, data: ScanOutput) => {
-		resolve({
+	try {
+		const data: ScanCommandOutput = await dynamoDocumentClient.send(new ScanCommand({
+			TableName: halfsiesLogTableName,
+		}))
+
+		return {
+			isError: false,
 			data: data.Items,
-			errorMessage: error?.message,
-			isError: Boolean(error), 
-		})
+		}
+	} catch (error: unknown) {
+		return {
+			isError: true,
+			errorMessage: error instanceof Error ? error.message : "Unknown error occurred",
+		}
 	}
+}
 
-	dynamoDbClient.scan({ TableName: halfsiesLogTableName },  handleDbReturn)
-})
-
-export const saveLog = async (log: NewLog, userName: string): Promise<DatabaseResponse> => new Promise((resolve) => {
+export const saveLog = async (log: NewLog, userName: string): Promise<DatabaseResponse> => {
+	const dynamoDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient)
 	const { halfsiesLogTableName = '' } = process.env
 	const { amount, description } = log
-	const dynamoDbClient = new DynamoDB.DocumentClient()
 	const now: Date = new Date()
 
-	const dbQueryParams: DynamoDB.DocumentClient.PutItemInput = {
-		TableName: halfsiesLogTableName,
-		Item: {
-			amount,
-			date: now.toISOString(),
-			description,
-			id: now.getTime(),
-			user: userName,
-		},
+	try {
+		await dynamoDocumentClient.send(new PutCommand({
+			TableName: halfsiesLogTableName,
+			Item: {
+				amount,
+				date: now.toISOString(),
+				description,
+				id: now.getTime(),
+				user: userName,
+			},
+		}))
+
+		return {
+			isError: false,
+		}
+	} catch (error: unknown) {
+		return {
+			isError: true,
+			errorMessage: error instanceof Error ? error.message : "Unknown error occurred",
+		}
 	}
+}
 
-	const handleDbReturn = (error: AWSError) => {
-		resolve({
-			errorMessage: error?.message,
-			isError: Boolean(error),
-		})
-	}
-
-	dynamoDbClient.put(dbQueryParams, handleDbReturn)
-})
-
-export const deleteLog = async (id: number): Promise<DatabaseResponse> => new Promise((resolve) => {
+export const deleteLog = async (id: number): Promise<DatabaseResponse> => {
 	const { halfsiesLogTableName = '' } = process.env
-	const dynamoDbClient = new DynamoDB.DocumentClient()
 
-	const dbQueryParams: DynamoDB.DocumentClient.DeleteItemInput = {
+	const dbQueryParams: DeleteItemCommandInput = {
 		TableName: halfsiesLogTableName,
-		Key: { id },
+		Key: marshall({ id }),
 	}
 
-	const handleDbReturn = (error: AWSError) => {
-		resolve({
+	try {
+		await dynamoDbClient.send(new DeleteItemCommand(dbQueryParams))
+		return {
+			isError: false,
+		}
+	} catch (error: any) {
+		return {
 			errorMessage: error?.message,
-			isError: Boolean(error),
-		})
+			isError: true,
+		}
 	}
-
-	dynamoDbClient.delete(dbQueryParams, handleDbReturn)
-})
+}

@@ -72,6 +72,11 @@ export class HalfsiesStack extends Stack {
 		const createHalfsie: NodejsFunction = new NodejsFunction(this, 'createHalfsie', {
 			functionName: `halfsiesCreateHalfsie${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'createHalfsie.ts'),
+			bundling: {
+				externalModules: ['aws-sdk'],
+				minify: true,
+				sourceMap: false,
+			},
 			handler: 'handler',
 			runtime: HALFSIES_NODE_VERSION,
 			environment: {
@@ -84,6 +89,11 @@ export class HalfsiesStack extends Stack {
 		const getBalance: NodejsFunction = new NodejsFunction(this, 'getBalance', {
 			functionName: `halfsiesGetBalance${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'getBalance.ts'),
+			bundling: {
+				externalModules: ['aws-sdk'],
+				minify: true,
+				sourceMap: false,
+			},
 			handler: 'handler',
 			runtime: HALFSIES_NODE_VERSION,
 			environment: {
@@ -95,6 +105,11 @@ export class HalfsiesStack extends Stack {
 		const getLog: NodejsFunction = new NodejsFunction(this, 'getLog', {
 			functionName: `halfsiesGetLog${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'getLog.ts'),
+			bundling: {
+				externalModules: ['aws-sdk'],
+				minify: true,
+				sourceMap: false,
+			},
 			handler: 'handler',
 			runtime: HALFSIES_NODE_VERSION,
 			environment: {
@@ -106,6 +121,11 @@ export class HalfsiesStack extends Stack {
 		const initializeHalfsiesDatabase: NodejsFunction = new NodejsFunction(this, 'initializeHalfsiesDatabase', {
 			functionName: `halfsiesInitializeHalfsiesDatabase${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'initializeHalfsiesDatabase.ts'),
+			bundling: {
+				externalModules: ['aws-sdk'],
+				minify: true,
+				sourceMap: false,
+			},
 			handler: 'handler',
 			runtime: HALFSIES_NODE_VERSION,
 			environment: {
