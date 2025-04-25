@@ -1,29 +1,32 @@
 import { CloudFormationCustomResourceEvent } from 'aws-lambda'
-import { DynamoDB } from 'aws-sdk'
+import {
+	DynamoDBClient,
+	PutItemCommand,
+	PutItemCommandInput,
+	ConditionalCheckFailedException,
+} from '@aws-sdk/client-dynamodb'
 import { generateNewBalanceDbItem, sendCustomResourceLambdaResponse } from '../../utils'
+
+const dynamoDbClient = new DynamoDBClient()
 
 export const handler = async (event: CloudFormationCustomResourceEvent) => {
 	const { balanceTableName = '' } = process.env
 
 	if (event.RequestType === 'Create') {
-		const dynamoDb = new DynamoDB()
-
-		const params = {
+		const params: PutItemCommandInput = {
 			TableName: balanceTableName,
 			Item: generateNewBalanceDbItem(0),
-			// Ensures the value is only inserted if it doesn't already exist.
 			ConditionExpression: 'attribute_not_exists(id)',
 		}
 
 		try {
-			await dynamoDb.putItem(params).promise()
-		} catch (error: any) {
-			if (error.code === 'ConditionalCheckFailedException') {
-				// This error is expected on any stack update where the balance db has data already.
+			await dynamoDbClient.send(new PutItemCommand(params))
+		} catch (error) {
+			if (error instanceof ConditionalCheckFailedException) {
 				// eslint-disable-next-line no-console
 				console.warn('Halfsies balance amount already exists, skipping initialization.')
 			} else {
-				throw new Error(error)
+				throw new Error((error as Error).message)
 			}
 		}
 

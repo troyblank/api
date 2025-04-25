@@ -73,7 +73,6 @@ export class HalfsiesStack extends Stack {
 			functionName: `halfsiesCreateHalfsie${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'createHalfsie.ts'),
 			bundling: {
-				externalModules: ['aws-sdk'],
 				minify: true,
 				sourceMap: false,
 			},
@@ -90,7 +89,6 @@ export class HalfsiesStack extends Stack {
 			functionName: `halfsiesGetBalance${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'getBalance.ts'),
 			bundling: {
-				externalModules: ['aws-sdk'],
 				minify: true,
 				sourceMap: false,
 			},
@@ -106,7 +104,6 @@ export class HalfsiesStack extends Stack {
 			functionName: `halfsiesGetLog${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'getLog.ts'),
 			bundling: {
-				externalModules: ['aws-sdk'],
 				minify: true,
 				sourceMap: false,
 			},
@@ -122,7 +119,6 @@ export class HalfsiesStack extends Stack {
 			functionName: `halfsiesInitializeHalfsiesDatabase${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'initializeHalfsiesDatabase.ts'),
 			bundling: {
-				externalModules: ['aws-sdk'],
 				minify: true,
 				sourceMap: false,
 			},

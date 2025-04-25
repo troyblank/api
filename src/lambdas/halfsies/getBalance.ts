@@ -1,4 +1,3 @@
-import { AWSError } from 'aws-sdk'
 import { APIGatewayProxyResult } from 'aws-lambda'
 import { type DatabaseResponse } from '../../types'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
@@ -22,7 +21,7 @@ export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolv
 		}
 	
 		result.body = JSON.stringify({ message: errorMessage, balance })
-	}).catch((error: AWSError) => {
+	}).catch((error) => {
 		result.statusCode = RESPONSE_CODE_SERVER_ERROR
 		result.body = JSON.stringify({ message: error.toString() })
 	}).finally(() => {
