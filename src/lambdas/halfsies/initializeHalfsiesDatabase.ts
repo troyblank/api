@@ -1,4 +1,4 @@
-import { CloudFormationCustomResourceEvent } from 'aws-lambda'
+import { type CloudFormationCustomResourceEvent } from 'aws-lambda'
 import {
 	DynamoDBClient,
 	PutItemCommand,

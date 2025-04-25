@@ -1,5 +1,5 @@
 // THIS NEEDS UNIT TESTING
-import { CloudFormationCustomResourceEvent } from 'aws-lambda'
+import { type CloudFormationCustomResourceEvent } from 'aws-lambda'
 import { request } from 'https'
 
 // When using lambdas as custom resources in CloudFormation, you must return a response to the custom resource request.
