@@ -1,6 +1,6 @@
 import { HALFSIES_MAX_LOGS } from '../../../config'
 import { type DatabaseResponse, type HalfsieLog } from '../../types'
-import { deleteLog, getLog } from '../../lambdas/halfsies/utils'
+import { deleteLog, getLog } from '../../lambdas/halfsies/utils/log'
 
 export const isALog = (log: any): boolean => {
 	return typeof log.amount === 'number' && typeof log.description === 'string'

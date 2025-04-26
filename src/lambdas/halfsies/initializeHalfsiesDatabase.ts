@@ -5,7 +5,8 @@ import {
 	PutItemCommandInput,
 	ConditionalCheckFailedException,
 } from '@aws-sdk/client-dynamodb'
-import { generateNewBalanceDbItem, sendCustomResourceLambdaResponse } from '../../utils'
+import { sendCustomResourceLambdaResponse } from '../../utils/lambdas'
+import { generateNewBalanceDbItem} from '../../utils/halfsies'
 
 const dynamoDbClient = new DynamoDBClient()
 

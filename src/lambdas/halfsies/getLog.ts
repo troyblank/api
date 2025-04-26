@@ -1,8 +1,8 @@
 import { type APIGatewayProxyResult } from 'aws-lambda'
 import { type DatabaseResponse } from '../../types'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
-import { sortLogs } from '../../utils'
-import { getLog } from './utils'
+import { sortLogs } from '../../utils/halfsies/log'
+import { getLog } from './utils/log'
 
 export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolve) => {
 	const { accessControlAllowOrigin = '' } = process.env

@@ -1,7 +1,8 @@
 import { type APIGatewayProxyEvent, type APIGatewayProxyResult } from 'aws-lambda'
 import { type DatabaseResponse, type NewLog } from '../../types'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
-import { isALog, isUserNameTheMainUserName, pruneLogs } from '../../utils'
+import { isUserNameTheMainUserName } from '../../utils/halfsies/auth'
+import { isALog, pruneLogs } from '../../utils/halfsies/log'
 import {
 	getBalance,
 	getUserName,

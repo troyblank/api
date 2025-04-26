@@ -13,10 +13,14 @@ import {
 } from 'aws-cdk-lib/aws-apigateway'
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager'
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb'
+import { Runtime } from 'aws-cdk-lib/aws-lambda'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
-import { HALFSIES_NODE_VERSION } from '../../config'
 import { HalfsiesStackProps } from '../types'
-import { addCorsOptions, createTable, requiresAuthorization } from '../utils'
+import { requiresAuthorization } from '../utils/auth'
+import { createTable } from '../utils/tables'
+import { addCorsOptions } from '../utils/apiGateway'
+
+const NODE_VERSION = Runtime.NODEJS_20_X
 
 // ----------------------------------------------------------------------------------------
 // WHEN DELETING THIS IN CLOUD FORMATION
@@ -72,12 +76,12 @@ export class HalfsiesStack extends Stack {
 		const createHalfsie: NodejsFunction = new NodejsFunction(this, 'createHalfsie', {
 			functionName: `halfsiesCreateHalfsie${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'createHalfsie.ts'),
-			// bundling: {
-			// 	minify: true,
-			// 	sourceMap: false,
-			// },
+			bundling: {
+				minify: true,
+				sourceMap: false,
+			},
 			handler: 'handler',
-			runtime: HALFSIES_NODE_VERSION,
+			runtime: NODE_VERSION,
 			environment: {
 				accessControlAllowOrigin,
 				balanceTableName: balanceDb.tableName,
@@ -88,12 +92,12 @@ export class HalfsiesStack extends Stack {
 		const getBalance: NodejsFunction = new NodejsFunction(this, 'getBalance', {
 			functionName: `halfsiesGetBalance${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'getBalance.ts'),
-			// bundling: {
-			// 	minify: true,
-			// 	sourceMap: false,
-			// },
+			bundling: {
+				minify: true,
+				sourceMap: false,
+			},
 			handler: 'handler',
-			runtime: HALFSIES_NODE_VERSION,
+			runtime: NODE_VERSION,
 			environment: {
 				accessControlAllowOrigin,
 				balanceTableName: balanceDb.tableName,
@@ -103,12 +107,12 @@ export class HalfsiesStack extends Stack {
 		const getLog: NodejsFunction = new NodejsFunction(this, 'getLog', {
 			functionName: `halfsiesGetLog${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'getLog.ts'),
-			// bundling: {
-			// 	minify: true,
-			// 	sourceMap: false,
-			// },
+			bundling: {
+				minify: true,
+				sourceMap: false,
+			},
 			handler: 'handler',
-			runtime: HALFSIES_NODE_VERSION,
+			runtime: NODE_VERSION,
 			environment: {
 				accessControlAllowOrigin,
 				halfsiesLogTableName: logDb.tableName,
@@ -123,7 +127,7 @@ export class HalfsiesStack extends Stack {
 			// 	sourceMap: false,
 			// },
 			handler: 'handler',
-			runtime: HALFSIES_NODE_VERSION,
+			runtime: NODE_VERSION,
 			environment: {
 				balanceTableName: balanceDb.tableName,
 			},
