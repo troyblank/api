@@ -1,26 +1,44 @@
 import { Chance } from 'chance'
 import { getBalance, updateBalance } from './balance'
 
-jest.mock('aws-sdk', () => {
+jest.mock('@aws-sdk/client-dynamodb', () => ({
+	...jest.requireActual('@aws-sdk/client-dynamodb'),
+	DynamoDBClient: jest.fn(() => ({
+		send: jest.fn(),
+	})),
+}))
+
+jest.mock('@aws-sdk/lib-dynamodb', () => {
 	return {
-		DynamoDB: {
-			DocumentClient: jest.fn(() => ({
-				get: (_: any, callback: Function) => callback(null, { Item: { balance: 532 } }),
-				update: (_: any, callback: Function) => callback(null, { Attributes: { balance: 624 } }),
+		...jest.requireActual('@aws-sdk/lib-dynamodb'),
+		DynamoDBDocumentClient: {
+			from: jest.fn(() => ({
+				send: jest.fn((command) => {
+					if (command.constructor.name === 'GetCommand') {
+						return Promise.resolve({ Item: { balance: 532 } })
+					}
+					if (command.constructor.name === 'UpdateCommand') {
+						return Promise.resolve({ Attributes: { balance: 624 } })
+					}
+					return Promise.resolve({})
+				}),
 			})),
 		},
 	}
-})
+})	
 
 describe('Balance util - success', () => {
 	const chance = new Chance()
+
+	beforeEach(() => {
+		process.env.balanceTableName = chance.word({ syllables: 4 })
+	})
 
 	it('should return a balance', async () => {
 		const result = await getBalance()
 
 		expect(result).toStrictEqual({
 			data: 532,
-			errorMessage: undefined,
 			isError: false,
 		})
 	})
@@ -30,7 +48,6 @@ describe('Balance util - success', () => {
 
 		expect(result).toStrictEqual({
 			data: 624,
-			errorMessage: undefined,
 			isError: false,
 		})
 	})

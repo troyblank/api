@@ -1,6 +1,13 @@
 import { Chance } from 'chance'
 import { getBalance, updateBalance } from './balance'
 
+jest.mock('@aws-sdk/client-dynamodb', () => ({
+	...jest.requireActual('@aws-sdk/client-dynamodb'),
+	DynamoDBClient: jest.fn(() => ({
+		send: jest.fn(),
+	})),
+}))
+
 jest.mock('@aws-sdk/lib-dynamodb', () => {
 	return {
 		...jest.requireActual('@aws-sdk/lib-dynamodb'),
@@ -11,8 +18,13 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
 		},
 	}
 })
+
 describe('Balance util - failure', () => {
 	const chance = new Chance()
+
+	beforeEach(() => {
+		process.env.balanceTableName = chance.word({ syllables: 4 })
+	})
 
 	it('should allow fail when getting a balance', async () => {
 		const result = await getBalance()

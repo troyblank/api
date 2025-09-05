@@ -8,9 +8,8 @@ import {
 } from "@aws-sdk/lib-dynamodb"
 import { type DatabaseResponse } from '../../../types'
 
-const dynamoDbClient = new DynamoDBClient()
-
 export const getBalance = async (): Promise<DatabaseResponse> => {
+	const dynamoDbClient = new DynamoDBClient()
 	const dynamoDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient)
 	const { balanceTableName = '' } = process.env
 
@@ -35,6 +34,7 @@ export const getBalance = async (): Promise<DatabaseResponse> => {
 }
 
 export const updateBalance = async (newBalance: number): Promise<DatabaseResponse> => {
+	const dynamoDbClient = new DynamoDBClient()
 	const dynamoDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient)
 	const { balanceTableName = '' } = process.env
 
@@ -54,7 +54,6 @@ export const updateBalance = async (newBalance: number): Promise<DatabaseRespons
 		return {
 			isError: false,
 			data: result.Attributes?.balance,
-			errorMessage: undefined,
 		}
 	} catch (error) {
 		return {

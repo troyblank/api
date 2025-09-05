@@ -16,7 +16,6 @@ jest.mock('../../utils/lambdas', () => ({
 	sendCustomResourceLambdaResponse: jest.fn(),
 }))
 
-
 describe('Lambda - Initialize Halfsies Database', () => {
 	const chance = new Chance()
 

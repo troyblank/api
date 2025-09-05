@@ -2,13 +2,19 @@ import { Chance } from 'chance'
 import { mockNewLog } from '../../../mocks'
 import { deleteLog, getLog, saveLog } from './log'
 
-jest.mock('aws-sdk', () => {
+jest.mock('@aws-sdk/client-dynamodb', () => ({
+	DynamoDBClient: jest.fn(() => ({
+		send: jest.fn().mockRejectedValue(new Error('Something bad happened.')),
+	})),
+}))
+
+jest.mock('@aws-sdk/lib-dynamodb', () => {
+	const originalModule = jest.requireActual('@aws-sdk/lib-dynamodb')
 	return {
-		DynamoDB: {
-			DocumentClient: jest.fn(() => ({
-				delete: (_: any, callback: Function) => callback({ message: 'Something bad happened.' }, { Item: {} }),
-				put: (_: any, callback: Function) => callback({ message: 'Something bad happened.' }, { Item: {} }),
-				scan: (_: any, callback: Function) => callback({ message: 'Something bad happened.' }, { Item: {} }),
+		...originalModule,
+		DynamoDBDocumentClient: {
+			from: jest.fn(() => ({
+				send: jest.fn().mockRejectedValue(new Error('Something bad happened.')),
 			})),
 		},
 	}
@@ -16,6 +22,10 @@ jest.mock('aws-sdk', () => {
 
 describe('Log util - failure', () => {
 	const chance = new Chance()
+
+	beforeEach(() => {
+		process.env.halfsiesLogTableName = chance.word({ syllables: 4 })
+	})
 
 	it('should allow fail when getting logs', async () => {
 		const result = await getLog()
