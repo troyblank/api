@@ -1,23 +1,18 @@
 import { Chance } from 'chance'
-import { DynamoDB } from 'aws-sdk'
-
-const putItemMock = jest.fn().mockReturnValue({
-	promise: jest.fn().mockResolvedValue({}),
-})
-
-const alreadyHasDataPutItemMock = jest.fn().mockReturnValue({
-	promise: jest.fn().mockRejectedValue({ code: 'ConditionalCheckFailedException' }),
-})
-
-const errorPutItemMock = jest.fn().mockReturnValue({
-	promise: jest.fn().mockRejectedValue({ code: '' }),
-})
-
+import { ConditionalCheckFailedException, DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { sendCustomResourceLambdaResponse } from '../../utils/lambdas'
 import { handler } from './initializeHalfsiesDatabase'
-import { generateNewBalanceDbItem } from '../../utils'
+import { generateNewBalanceDbItem} from '../../utils/halfsies'
 
-jest.mock('../../utils', () => ({
-	...jest.requireActual('../../utils'),
+jest.mock('@aws-sdk/client-dynamodb', () => ({
+	...jest.requireActual('@aws-sdk/client-dynamodb'),
+	DynamoDBClient: jest.fn(() => ({
+		send: jest.fn(),
+	})),
+}))
+
+jest.mock('../../utils/lambdas', () => ({
+	...jest.requireActual('../../utils/lambdas'),
 	sendCustomResourceLambdaResponse: jest.fn(),
 }))
 
@@ -25,51 +20,75 @@ jest.mock('../../utils', () => ({
 describe('Lambda - Initialize Halfsies Database', () => {
 	const chance = new Chance()
 
-	beforeEach(() => {
-		DynamoDB.prototype.putItem = putItemMock
-	})
-
 	it('Should not initialize the Halfises database anytime when we are not creating the lambda.', async () => {
+		const putItemMock = jest.fn().mockReturnValue({
+			promise: jest.fn().mockResolvedValue({}),
+		})
+
 		await handler({ RequestType: chance.word({ syllables: 4 }) } as any)
 
 		expect(putItemMock).not.toHaveBeenCalled()
 	})
 
 	it('Should not initialize the Halfises database anytime when there is already data in the database.', async () => {
-		DynamoDB.prototype.putItem = alreadyHasDataPutItemMock
+		const tableName = chance.word()
+		const send = jest.fn().mockRejectedValue(new ConditionalCheckFailedException({} as any))
+
+		jest.mocked(DynamoDBClient).mockImplementation(() => ({
+			send,
+		}) as any)
 
 		jest.spyOn(console, 'warn').mockImplementation(() => {})
-		
-		const tableName = chance.word()
 
 		process.env.balanceTableName = tableName
 
 		await handler({ RequestType: 'Create' } as any)
 
 		// eslint-disable-next-line no-console
-		expect(console.warn).toHaveBeenCalledWith('Halfsies balance amount already exists, skipping initialization.')
+		expect(console.warn).toHaveBeenCalledWith(
+			'Halfsies balance amount already exists, skipping initialization.',
+		)
 	})
 
-	it('Should throw an error if there is any issues putting the value in the database.', async () => {
-		DynamoDB.prototype.putItem = errorPutItemMock
-		
+	it('Should throw an error if there are any issues putting the value in the database.', async () => {
 		const tableName = chance.word()
+		const error = chance.sentence()
+		const send = jest.fn().mockRejectedValue(new Error(error))
+
+		jest.mocked(DynamoDBClient).mockImplementation(() => ({
+			send,
+		}) as any)
 
 		process.env.balanceTableName = tableName
 
-		expect(async() => await handler({ RequestType: 'Create' } as any)).toThrowError()
+		await expect(handler({ RequestType: 'Create' } as any))
+			.rejects.toThrow(error)
 	})
 
 	it('Should initialize the Halfises database with a balance of zero.', async () => {
 		const tableName = chance.word()
+		const send = jest.fn()
+
+		const event = {
+			RequestType: 'Create',
+		}
+
+		jest.mocked(DynamoDBClient).mockImplementation(() => ({
+			send,
+		}) as any)
 
 		process.env.balanceTableName = tableName
-		await handler({ RequestType: 'Create' } as any)
+		await handler({
+			...event,
+		} as any)
 
-		expect(putItemMock).toHaveBeenCalledWith({
-			ConditionExpression: 'attribute_not_exists(id)',
-			TableName: tableName,
-			Item: generateNewBalanceDbItem(0),
-		})
+		expect(send).toHaveBeenCalledWith(expect.objectContaining({
+			input: expect.objectContaining({
+				TableName: tableName,
+				Item: generateNewBalanceDbItem(0),
+				ConditionExpression: 'attribute_not_exists(id)',
+			}),
+		}))
+		expect(sendCustomResourceLambdaResponse).toHaveBeenCalledWith(event, true)
 	})
 })

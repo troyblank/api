@@ -8,9 +8,8 @@ import {
 import { sendCustomResourceLambdaResponse } from '../../utils/lambdas'
 import { generateNewBalanceDbItem} from '../../utils/halfsies'
 
-const dynamoDbClient = new DynamoDBClient()
-
 export const handler = async (event: CloudFormationCustomResourceEvent) => {
+	const dynamoDbClient = new DynamoDBClient()
 	const { balanceTableName = '' } = process.env
 
 	if (event.RequestType === 'Create') {
