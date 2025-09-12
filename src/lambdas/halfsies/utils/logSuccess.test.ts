@@ -3,9 +3,8 @@ import { mockNewLog } from '../../../mocks'
 import { deleteLog, getLog, saveLog } from './log'
 
 jest.mock('@aws-sdk/client-dynamodb', () => ({
-	DynamoDBClient: jest.fn(() => ({
-		send: jest.fn().mockRejectedValue(new Error('Something bad happened.')),
-	})),
+	...jest.requireActual('@aws-sdk/client-dynamodb'),
+	DynamoDBClient: jest.fn(() => ({})),
 }))
 
 jest.mock('@aws-sdk/lib-dynamodb', () => {
@@ -14,7 +13,7 @@ jest.mock('@aws-sdk/lib-dynamodb', () => {
 		...originalModule,
 		DynamoDBDocumentClient: {
 			from: jest.fn(() => ({
-				send: jest.fn().mockRejectedValue(new Error('Something bad happened.')),
+				send: jest.fn().mockResolvedValue({ Items: [] }),
 			})),
 		},
 	}

@@ -1,6 +1,7 @@
 import { HALFSIES_MAX_LOGS } from '../../../config'
 import { type DatabaseResponse, type HalfsieLog } from '../../types'
 import { deleteLog, getLog } from '../../lambdas/halfsies/utils/log'
+import { getErrorMessage } from '../../utils/error'
 
 export const isALog = (log: any): boolean => {
 	return typeof log.amount === 'number' && typeof log.description === 'string'
@@ -57,7 +58,7 @@ export const pruneLogs = async (): Promise<DatabaseResponse> => new Promise((res
 		})
 	}).catch((error) => {
 		resolve({
-			errorMessage: error instanceof Error ? error.message : "Unknown error occurred",
+			errorMessage: getErrorMessage(error),
 			isError: true,
 		})
 	})

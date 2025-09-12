@@ -2,16 +2,18 @@ import { Chance } from 'chance'
 import { HALFSIES_MAX_LOGS } from '../../../config'
 import { type HalfsieLog } from '../../types'
 import { mockHalfsieLog, mockHalfsieLogs } from '../../mocks'
-import { deleteLog, getLog } from '../../lambdas/halfsies/utils'
+import { deleteLog, getLog } from '../../lambdas/halfsies/utils/log'
 import { isALog, pruneLogs, sortLogs } from './log'
 
 jest.mock('../../../config')
-jest.mock('../../lambdas/halfsies/utils')
+jest.mock('../../lambdas/halfsies/utils/log')
 
 describe('Log util', () => {
 	const chance = new Chance()
 
 	beforeEach(() => {
+		process.env.halfsiesLogTableName = chance.word({ syllables: 4 })
+
 		jest.mocked(deleteLog).mockResolvedValue({ isError: false, errorMessage: '' })
 	})
 
@@ -72,7 +74,7 @@ describe('Log util', () => {
 	it('Should not be able to prune logs if there is an error getting the logs.', async () => {
 		const errorMessage: string = chance.sentence()
 
-		jest.mocked(getLog).mockRejectedValue({ message: errorMessage })
+		jest.mocked(getLog).mockResolvedValue({ isError: true, errorMessage: errorMessage })
 
 		const result = await pruneLogs()
 

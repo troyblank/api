@@ -1,6 +1,5 @@
 import {
 	DeleteItemCommand,
-	DeleteItemCommandInput,
 	DynamoDBClient,
 } from '@aws-sdk/client-dynamodb'
 import {
@@ -11,12 +10,12 @@ import {
 } from "@aws-sdk/lib-dynamodb"
 import { marshall } from '@aws-sdk/util-dynamodb'
 import { type DatabaseResponse, type NewLog } from '../../../types'
-
-const dynamoDbClient = new DynamoDBClient()
+import { getErrorMessage } from '../../../utils/error'
 
 export const getLog = async (): Promise<DatabaseResponse> => {
+	const dynamoDbClient = new DynamoDBClient()
 	const dynamoDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient)
-	const { halfsiesLogTableName = '' } = process.env
+	const { halfsiesLogTableName } = process.env
 
 	try {
 		const data: ScanCommandOutput = await dynamoDocumentClient.send(new ScanCommand({
@@ -30,14 +29,15 @@ export const getLog = async (): Promise<DatabaseResponse> => {
 	} catch (error: unknown) {
 		return {
 			isError: true,
-			errorMessage: error instanceof Error ? error.message : "Unknown error occurred",
+			errorMessage: getErrorMessage(error),
 		}
 	}
 }
 
 export const saveLog = async (log: NewLog, userName: string): Promise<DatabaseResponse> => {
+	const dynamoDbClient = new DynamoDBClient()
 	const dynamoDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient)
-	const { halfsiesLogTableName = '' } = process.env
+	const { halfsiesLogTableName } = process.env
 	const { amount, description } = log
 	const now: Date = new Date()
 
@@ -59,27 +59,30 @@ export const saveLog = async (log: NewLog, userName: string): Promise<DatabaseRe
 	} catch (error: unknown) {
 		return {
 			isError: true,
-			errorMessage: error instanceof Error ? error.message : "Unknown error occurred",
+			errorMessage: getErrorMessage(error),
 		}
 	}
 }
 
 export const deleteLog = async (id: number): Promise<DatabaseResponse> => {
-	const { halfsiesLogTableName = '' } = process.env
-
-	const dbQueryParams: DeleteItemCommandInput = {
-		TableName: halfsiesLogTableName,
-		Key: marshall({ id }),
-	}
+	const dynamoDbClient = new DynamoDBClient()
+	const dynamoDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient)
+	const { halfsiesLogTableName } = process.env
 
 	try {
-		await dynamoDbClient.send(new DeleteItemCommand(dbQueryParams))
+		await dynamoDocumentClient.send(
+			new DeleteItemCommand({
+				TableName: halfsiesLogTableName,
+				Key: marshall({ id }),
+			}),
+		)
+
 		return {
 			isError: false,
 		}
 	} catch (error: any) {
 		return {
-			errorMessage: error?.message,
+			errorMessage: getErrorMessage(error),
 			isError: true,
 		}
 	}

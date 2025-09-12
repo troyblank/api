@@ -10,7 +10,7 @@ import { generateNewBalanceDbItem} from '../../utils/halfsies'
 
 export const handler = async (event: CloudFormationCustomResourceEvent) => {
 	const dynamoDbClient = new DynamoDBClient()
-	const { balanceTableName = '' } = process.env
+	const { balanceTableName } = process.env
 
 	if (event.RequestType === 'Create') {
 		const params: PutItemCommandInput = {

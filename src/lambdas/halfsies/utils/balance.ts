@@ -11,7 +11,7 @@ import { type DatabaseResponse } from '../../../types'
 export const getBalance = async (): Promise<DatabaseResponse> => {
 	const dynamoDbClient = new DynamoDBClient()
 	const dynamoDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient)
-	const { balanceTableName = '' } = process.env
+	const { balanceTableName } = process.env
 
 	const params: GetCommandInput = {
 		TableName: balanceTableName,
@@ -36,7 +36,7 @@ export const getBalance = async (): Promise<DatabaseResponse> => {
 export const updateBalance = async (newBalance: number): Promise<DatabaseResponse> => {
 	const dynamoDbClient = new DynamoDBClient()
 	const dynamoDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient)
-	const { balanceTableName = '' } = process.env
+	const { balanceTableName } = process.env
 
 	const params: UpdateCommandInput = {
 		TableName: balanceTableName,

@@ -3,7 +3,7 @@ import { MAIN_USER_NAME } from '../../../config'
 import { HalfsieLog } from '../../types'
 import { mockApiGatewayProxyEvent, mockHalfsieLogs, mockNewLog } from '../../mocks'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
-import * as utils from '../../utils'
+import { pruneLogs } from '../../utils/halfsies/log'
 import {
 	getBalance,
 	getUserName,
@@ -12,12 +12,10 @@ import {
 } from './utils'
 import { handler } from './createHalfsie'
 
-jest.mock('../../utils', () => {
-	return {
-		__esModule: true,
-		...jest.requireActual('../../utils'),
-	}
-})
+jest.mock('../../utils/halfsies/log', () => ({
+	...jest.requireActual('../../utils/halfsies/log'),
+	pruneLogs: jest.fn(),
+}))
 jest.mock('./utils')
 
 describe('Lambda - Create Halfsie', () => {
@@ -26,6 +24,9 @@ describe('Lambda - Create Halfsie', () => {
 	const newLogs: HalfsieLog[] = mockHalfsieLogs()
 
 	beforeEach(() => {
+		process.env.balanceTableName = chance.word({ syllables: 4 })
+		process.env.halfsiesLogTableName = chance.word({ syllables: 4 })
+		
 		jest.mocked(getBalance).mockResolvedValue({
 			data: currentBalance,
 			isError: false,
@@ -43,7 +44,7 @@ describe('Lambda - Create Halfsie', () => {
 			errorMessage: undefined,
 		})
 
-		jest.spyOn(utils, 'pruneLogs').mockResolvedValue({
+		jest.mocked(pruneLogs).mockResolvedValue({
 			data: newLogs,
 			isError: false,
 			errorMessage: undefined,
@@ -244,7 +245,7 @@ describe('Lambda - Create Halfsie', () => {
 	it('should return an error if there is a problem using the prune logs util', async () => {
 		const errorMessage = chance.sentence()
 
-		jest.spyOn(utils, 'pruneLogs').mockRejectedValue(errorMessage)
+		jest.mocked(pruneLogs).mockRejectedValue(errorMessage)
 
 		const result = await handler(mockApiGatewayProxyEvent(
 			mockNewLog(),
@@ -263,7 +264,7 @@ describe('Lambda - Create Halfsie', () => {
 	it('should return an error if there is a problem pruning the logs', async () => {
 		const errorMessage = chance.sentence()
 
-		jest.spyOn(utils, 'pruneLogs').mockResolvedValue({
+		jest.mocked(pruneLogs).mockResolvedValue({
 			errorMessage,
 			isError: true,
 		})

@@ -2,11 +2,15 @@ import { Chance } from 'chance'
 import { mockNewLog } from '../../../mocks'
 import { deleteLog, getLog, saveLog } from './log'
 
-jest.mock('@aws-sdk/client-dynamodb', () => ({
-	DynamoDBClient: jest.fn(() => ({
-		send: jest.fn().mockRejectedValue(new Error('Something bad happened.')),
-	})),
-}))
+jest.mock('@aws-sdk/client-dynamodb', () => {
+	const actual = jest.requireActual('@aws-sdk/client-dynamodb')
+	return {
+		...actual, // keeps DeleteItemCommand, DeleteItemCommandInput, etc.
+		DynamoDBClient: jest.fn(() => ({
+			send: jest.fn().mockRejectedValue(new Error('Something bad happened.')),
+		})),
+	}
+})
 
 jest.mock('@aws-sdk/lib-dynamodb', () => {
 	const originalModule = jest.requireActual('@aws-sdk/lib-dynamodb')
@@ -31,7 +35,6 @@ describe('Log util - failure', () => {
 		const result = await getLog()
 
 		expect(result).toStrictEqual({
-			data: undefined,
 			errorMessage: 'Something bad happened.',
 			isError: true,
 		})
