@@ -1,4 +1,4 @@
-import { getUserName } from './user'
+import { getUserName } from './'
 
 describe('User util', () => {
 
