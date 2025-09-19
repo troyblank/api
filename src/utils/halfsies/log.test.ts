@@ -3,6 +3,7 @@ import { HALFSIES_MAX_LOGS } from '../../../config'
 import { type HalfsieLog } from '../../types'
 import { mockHalfsieLog, mockHalfsieLogs } from '../../mocks'
 import { deleteLog, getLog } from '../../lambdas/halfsies/utils/log'
+import { getErrorMessage } from '../../utils/error'
 import { isALog, pruneLogs, sortLogs } from './log'
 
 jest.mock('../../../config')
@@ -32,7 +33,6 @@ describe('Log util', () => {
 	})
 
 	it('Should be able to sort logs based on date.', async () => {
-		
 		const logs: HalfsieLog[] = [
 			mockHalfsieLog({
 				date: new Date('1950-11-10').toISOString(),
@@ -137,6 +137,17 @@ describe('Log util', () => {
 		expect(result).toStrictEqual({
 			isError: true,
 			errorMessage: 'Failed to delete some logs.',
+		})
+	})
+
+	it('Should not be able to prune logs if there is an syntax error getting the logs.', async () => {
+		jest.mocked(getLog).mockResolvedValue(Promise.reject())
+
+		const result = await pruneLogs()
+
+		expect(result).toStrictEqual({
+			isError: true,
+			errorMessage: getErrorMessage({}),
 		})
 	})
 })

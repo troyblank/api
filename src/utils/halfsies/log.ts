@@ -30,7 +30,7 @@ export const pruneLogs = async (): Promise<DatabaseResponse> => new Promise((res
 			const logsToDelete = remainingLogs.slice(-amountOver)
 			remainingLogs = remainingLogs.slice(0, -amountOver)
 
-			logsToDelete.forEach(async ({ id }: { id: number }) => {
+			logsToDelete.forEach(({ id }: { id: number }) => {
 				logsAwaitingDeletion.push(deleteLog(id))
 			})
 		}
