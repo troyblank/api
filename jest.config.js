@@ -17,6 +17,7 @@ module.exports = {
 	testEnvironment: 'node',
 	rootDir: './',
 	roots: ['<rootDir>/src'],
+	setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 	transform: {
 		'^.+\\.ts?$': 'ts-jest',
 	},

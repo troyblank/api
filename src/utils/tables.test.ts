@@ -4,7 +4,7 @@ import { AttributeType } from 'aws-cdk-lib/aws-dynamodb'
 import { CreateTableType } from '../types'
 import * as tables from './tables'
 
-describe('Create Table', () => {
+describe('Table Utils', () => {
 	const chance = new Chance()
 	const SomeStack = new Stack()
 

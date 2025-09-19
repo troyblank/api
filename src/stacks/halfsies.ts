@@ -1,7 +1,7 @@
 /* istanbul ignore file */
 import { join } from 'path'
 import { Construct } from 'constructs'
-import { Stack } from 'aws-cdk-lib'
+import { CustomResource, Stack } from 'aws-cdk-lib'
 import {
 	CognitoUserPoolsAuthorizer,
 	LambdaIntegration,
@@ -13,16 +13,19 @@ import {
 } from 'aws-cdk-lib/aws-apigateway'
 import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager'
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb'
+import { Runtime } from 'aws-cdk-lib/aws-lambda'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
-import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources'
-import { HALFSIES_NODE_VERSION } from '../../config'
 import { HalfsiesStackProps } from '../types'
-import { createTable, generateNewBalanceDbItem, requiresAuthorization } from '../utils'
+import { requiresAuthorization } from '../utils/auth'
+import { createTable } from '../utils/tables'
+import { addCorsOptions } from '../utils/apiGateway'
+
+const NODE_VERSION = Runtime.NODEJS_20_X
 
 // ----------------------------------------------------------------------------------------
 // WHEN DELETING THIS IN CLOUD FORMATION
 // ----------------------------------------------------------------------------------------
-// 1. Be sure to remove any DNS records made under your custom domain name on your your domain provider's. (You will have to re-add this if re-deploy - your cert is on us-east-1).
+// 1. Be sure to remove the api DNS records made under your custom domain name on your your domain provider's. (You will have to re-add this if re-deploy - your cert is on us-east-1).
 // 2. Be sure to remove all DB tables from DynamoDB associated with this stack.
 
 export class HalfsiesStack extends Stack {
@@ -67,31 +70,18 @@ export class HalfsiesStack extends Stack {
 			stack: this,
 			type: AttributeType.NUMBER,
 		})
-
-		// Initial DB data
-		new AwsCustomResource(this, `halfsiesBalanceInitData${resourcePostFix}`, {
-			onCreate: {
-				service: 'DynamoDB',
-				action: 'putItem',
-				parameters: {
-					TableName: balanceDb.tableName,
-					Item: generateNewBalanceDbItem(0),
-				},
-				physicalResourceId: PhysicalResourceId.of('initDBData'),
-			},
-			policy: AwsCustomResourcePolicy.fromSdkCalls({
-				resources: AwsCustomResourcePolicy.ANY_RESOURCE,
-			}),
-		})
-
 		// ----------------------------------------------------------------------------------------
 		// LAMBDAS
-		// ----------------------------------------------------------------------------------------
+		// ----------------------------------------------------------------------------------------		
 		const createHalfsie: NodejsFunction = new NodejsFunction(this, 'createHalfsie', {
 			functionName: `halfsiesCreateHalfsie${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'createHalfsie.ts'),
+			bundling: {
+				minify: true,
+				sourceMap: false,
+			},
 			handler: 'handler',
-			runtime: HALFSIES_NODE_VERSION,
+			runtime: NODE_VERSION,
 			environment: {
 				accessControlAllowOrigin,
 				balanceTableName: balanceDb.tableName,
@@ -102,8 +92,12 @@ export class HalfsiesStack extends Stack {
 		const getBalance: NodejsFunction = new NodejsFunction(this, 'getBalance', {
 			functionName: `halfsiesGetBalance${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'getBalance.ts'),
+			bundling: {
+				minify: true,
+				sourceMap: false,
+			},
 			handler: 'handler',
-			runtime: HALFSIES_NODE_VERSION,
+			runtime: NODE_VERSION,
 			environment: {
 				accessControlAllowOrigin,
 				balanceTableName: balanceDb.tableName,
@@ -113,11 +107,29 @@ export class HalfsiesStack extends Stack {
 		const getLog: NodejsFunction = new NodejsFunction(this, 'getLog', {
 			functionName: `halfsiesGetLog${resourcePostFix}`,
 			entry: join(__dirname, '../lambdas', 'halfsies', 'getLog.ts'),
+			bundling: {
+				minify: true,
+				sourceMap: false,
+			},
 			handler: 'handler',
-			runtime: HALFSIES_NODE_VERSION,
+			runtime: NODE_VERSION,
 			environment: {
 				accessControlAllowOrigin,
 				halfsiesLogTableName: logDb.tableName,
+			},
+		})
+
+		const initializeHalfsiesDatabase: NodejsFunction = new NodejsFunction(this, 'initializeHalfsiesDatabase', {
+			functionName: `halfsiesInitializeHalfsiesDatabase${resourcePostFix}`,
+			entry: join(__dirname, '../lambdas', 'halfsies', 'initializeHalfsiesDatabase.ts'),
+			// bundling: {
+			// 	minify: true,
+			// 	sourceMap: false,
+			// },
+			handler: 'handler',
+			runtime: NODE_VERSION,
+			environment: {
+				balanceTableName: balanceDb.tableName,
 			},
 		})
 		// ----------------------------------------------------------------------------------------
@@ -141,6 +153,7 @@ export class HalfsiesStack extends Stack {
 		createHalfsieLambdaResource.addMethod('POST', createHalfsieLambdaIntegration, requiresAuthorization(authorizer))
 		balanceDb.grantReadWriteData(createHalfsie)
 		logDb.grantReadWriteData(createHalfsie)
+		addCorsOptions(createHalfsieLambdaResource, accessControlAllowOrigin)
 
 		// getBalance
 		const getBalanceLambdaIntegration: LambdaIntegration = new LambdaIntegration(getBalance)
@@ -148,6 +161,7 @@ export class HalfsiesStack extends Stack {
 
 		getBalanceLambdaResource.addMethod('GET', getBalanceLambdaIntegration, requiresAuthorization(authorizer))
 		balanceDb.grantReadData(getBalance)
+		addCorsOptions(getBalanceLambdaResource, accessControlAllowOrigin)
 
 		// getLog
 		const getLogLambdaIntegration: LambdaIntegration = new LambdaIntegration(getLog)
@@ -155,5 +169,16 @@ export class HalfsiesStack extends Stack {
 
 		getLogLambdaResource.addMethod('GET', getLogLambdaIntegration, requiresAuthorization(authorizer))
 		logDb.grantReadData(getLog)
+		addCorsOptions(getLogLambdaResource, accessControlAllowOrigin)
+
+		// initialize halfsies database
+		balanceDb.grantWriteData(initializeHalfsiesDatabase)
+
+		// ----------------------------------------------------------------------------------------
+		// CUSTOM RESOURCES
+		// ---------------------------------------------------------------------------------------
+		new CustomResource(this, `initializeHalfsiesDatabase${resourcePostFix}`, {
+			serviceToken: initializeHalfsiesDatabase.functionArn,
+		})
 	}
 }

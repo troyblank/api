@@ -1,5 +1,5 @@
 export type DatabaseResponse = {
 	data?: any,
-	errorMessage: string | undefined,
+	errorMessage?: string,
 	isError: boolean,
 }

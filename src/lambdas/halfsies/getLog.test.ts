@@ -1,14 +1,18 @@
 import { Chance } from 'chance'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
 import { mockHalfsieLog } from '../../mocks'
-import { sortLogs } from '../../utils'
-import { getLog } from './utils'
+import { sortLogs } from '../../utils/halfsies/log'
+import { getLog } from './utils/log'
 import { handler } from './getLog'
 
-jest.mock('./utils')
+jest.mock('./utils/log')
 
 describe('Lambda - Get Log', () => {
 	const chance = new Chance()
+
+	beforeEach(() => {
+		process.env.halfsiesLogTableName = chance.word({ syllables: 4 })
+	})
 
 	it('should return a log', async () => {
 		const log = [

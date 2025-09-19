@@ -1,31 +1,44 @@
-import { AWSError, DynamoDB } from 'aws-sdk'
-import { type GetItemOutput, type DocumentClient } from 'aws-sdk/clients/dynamodb'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import {
+	DynamoDBDocumentClient,
+	GetCommand,
+	UpdateCommand,
+	type GetCommandInput,
+	type UpdateCommandInput,
+} from "@aws-sdk/lib-dynamodb"
 import { type DatabaseResponse } from '../../../types'
 
-export const getBalance = async (): Promise<DatabaseResponse> => new Promise((resolve) => {
-	const { balanceTableName = '' } = process.env
-	const dynamoDbClient = new DynamoDB.DocumentClient()
-	const dbQueryParams: DynamoDB.DocumentClient.GetItemInput = {
+export const getBalance = async (): Promise<DatabaseResponse> => {
+	const dynamoDbClient = new DynamoDBClient()
+	const dynamoDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient)
+	const { balanceTableName } = process.env
+
+	const params: GetCommandInput = {
 		TableName: balanceTableName,
 		Key: { id: 0 },
 	}
 
-	const handleDbReturn = (error: AWSError, data: GetItemOutput) => {
-		resolve({
-			data: data.Item?.balance,
-			errorMessage: error?.message,
-			isError: Boolean(error), 
-		})
+	try {
+		const result = await dynamoDocumentClient.send(new GetCommand(params))
+
+		return {
+			isError: false,
+			data: result.Item?.balance,
+		}
+	} catch (error) {
+		return {
+			isError: true,
+			errorMessage: (error as Error).message,
+		}
 	}
+}
 
-	dynamoDbClient.get(dbQueryParams, handleDbReturn)
-})
+export const updateBalance = async (newBalance: number): Promise<DatabaseResponse> => {
+	const dynamoDbClient = new DynamoDBClient()
+	const dynamoDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient)
+	const { balanceTableName } = process.env
 
-export const updateBalance = async (newBalance: number): Promise<DatabaseResponse> => new Promise((resolve) => {
-	const { balanceTableName = '' } = process.env
-	const dynamoDbClient = new DynamoDB.DocumentClient()
-
-	const dbQueryParams = {
+	const params: UpdateCommandInput = {
 		TableName: balanceTableName,
 		Key: { id: 0 },
 		UpdateExpression: 'set balance = :num',
@@ -35,13 +48,17 @@ export const updateBalance = async (newBalance: number): Promise<DatabaseRespons
 		ReturnValues: 'UPDATED_NEW',
 	}
 
-	const handleDbReturn = (error: AWSError, data: DocumentClient.UpdateItemOutput) => {
-		resolve({
-			data: data.Attributes?.balance,
-			errorMessage: error?.message,
-			isError: Boolean(error), 
-		})
-	}
+	try {
+		const result = await dynamoDocumentClient.send(new UpdateCommand(params))
 
-	dynamoDbClient.update(dbQueryParams, handleDbReturn)
-})
+		return {
+			isError: false,
+			data: result.Attributes?.balance,
+		}
+	} catch (error) {
+		return {
+			isError: true,
+			errorMessage: (error as Error).message,
+		}
+	}
+}

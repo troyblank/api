@@ -1,8 +1,8 @@
-import { AWSError } from 'aws-sdk'
 import { type APIGatewayProxyEvent, type APIGatewayProxyResult } from 'aws-lambda'
 import { type DatabaseResponse, type NewLog } from '../../types'
 import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
-import { isALog, isUserNameTheMainUserName, pruneLogs } from '../../utils'
+import { isUserNameTheMainUserName } from '../../utils/halfsies/auth'
+import { isALog, pruneLogs } from '../../utils/halfsies/log'
 import {
 	getBalance,
 	getUserName,
@@ -53,20 +53,20 @@ export const handler = ({ body, headers }: APIGatewayProxyEvent): Promise<APIGat
 					} else {
 						result.body = JSON.stringify({ newBalance, newLog, newLogs })
 					}
-				}).catch((error: AWSError) => {
+				}).catch((error) => {
 					result.statusCode = RESPONSE_CODE_SERVER_ERROR
 					result.body = JSON.stringify({ message: error.toString() })
 				}).finally(() => {
 					resolve(result)
 				})
 			}
-		}).catch((error: AWSError) => {
+		}).catch((error) => {
 			result.statusCode = RESPONSE_CODE_SERVER_ERROR
 			result.body = JSON.stringify({ message: error.toString() })
 
 			resolve(result)
 		})
-	}).catch((error: AWSError) => {
+	}).catch((error) => {
 		result.statusCode = RESPONSE_CODE_SERVER_ERROR
 		result.body = JSON.stringify({ message: error.toString() })
 

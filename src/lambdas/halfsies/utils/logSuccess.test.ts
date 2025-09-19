@@ -1,23 +1,30 @@
 import { Chance } from 'chance'
-import { mockHalfsieLogs, mockNewLog } from '../../../mocks'
+import { mockNewLog } from '../../../mocks'
 import { deleteLog, getLog, saveLog } from './log'
 
-jest.mock('aws-sdk', () => {
+jest.mock('@aws-sdk/client-dynamodb', () => ({
+	...jest.requireActual('@aws-sdk/client-dynamodb'),
+	DynamoDBClient: jest.fn(() => ({})),
+}))
+
+jest.mock('@aws-sdk/lib-dynamodb', () => {
+	const originalModule = jest.requireActual('@aws-sdk/lib-dynamodb')
 	return {
-		DynamoDB: {
-			DocumentClient: jest.fn(() => ({
-				delete: (_: any, callback: Function) => callback(null),
-				put: (_: any, callback: Function) => callback(null),
-				scan: (_: any, callback: Function) => callback(null, { Items: mockHalfsieLogs() }),
+		...originalModule,
+		DynamoDBDocumentClient: {
+			from: jest.fn(() => ({
+				send: jest.fn().mockResolvedValue({ Items: [] }),
 			})),
 		},
 	}
 })
 
-jest.mock('./log')
-
 describe('Log util - success', () => {
 	const chance = new Chance()
+
+	beforeEach(() => {
+		process.env.halfsiesLogTableName = chance.word({ syllables: 4 })
+	})
 
 	it('should get logs', async () => {
 		expect(async () => await getLog()).not.toThrow()

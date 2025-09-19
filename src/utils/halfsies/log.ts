@@ -1,7 +1,7 @@
-import { AWSError } from 'aws-sdk'
 import { HALFSIES_MAX_LOGS } from '../../../config'
 import { type DatabaseResponse, type HalfsieLog } from '../../types'
-import { deleteLog, getLog } from '../../lambdas/halfsies/utils'
+import { deleteLog, getLog } from '../../lambdas/halfsies/utils/log'
+import { getErrorMessage } from '../../utils/error'
 
 export const isALog = (log: any): boolean => {
 	return typeof log.amount === 'number' && typeof log.description === 'string'
@@ -30,7 +30,7 @@ export const pruneLogs = async (): Promise<DatabaseResponse> => new Promise((res
 			const logsToDelete = remainingLogs.slice(-amountOver)
 			remainingLogs = remainingLogs.slice(0, -amountOver)
 
-			logsToDelete.forEach(async ({ id }: { id: number }) => {
+			logsToDelete.forEach(({ id }: { id: number }) => {
 				logsAwaitingDeletion.push(deleteLog(id))
 			})
 		}
@@ -50,15 +50,15 @@ export const pruneLogs = async (): Promise<DatabaseResponse> => new Promise((res
 				isError: false,
 				errorMessage: '',
 			})
-		}).catch((error: AWSError) => {
+		}).catch((error) => {
 			resolve({
 				errorMessage: error?.message,
 				isError: true,
 			})
 		})
-	}).catch((error: AWSError) => {
+	}).catch((error) => {
 		resolve({
-			errorMessage: error?.message,
+			errorMessage: getErrorMessage(error),
 			isError: true,
 		})
 	})
