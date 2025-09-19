@@ -3,9 +3,8 @@ import { mockNewLog } from '../../../mocks'
 import { deleteLog, getLog, saveLog } from './log'
 
 jest.mock('@aws-sdk/client-dynamodb', () => {
-	const actual = jest.requireActual('@aws-sdk/client-dynamodb')
 	return {
-		...actual, // keeps DeleteItemCommand, DeleteItemCommandInput, etc.
+		...jest.requireActual('@aws-sdk/client-dynamodb'),
 		DynamoDBClient: jest.fn(() => ({
 			send: jest.fn().mockRejectedValue(new Error('Something bad happened.')),
 		})),
@@ -13,9 +12,8 @@ jest.mock('@aws-sdk/client-dynamodb', () => {
 })
 
 jest.mock('@aws-sdk/lib-dynamodb', () => {
-	const originalModule = jest.requireActual('@aws-sdk/lib-dynamodb')
 	return {
-		...originalModule,
+		...jest.requireActual('@aws-sdk/lib-dynamodb'),
 		DynamoDBDocumentClient: {
 			from: jest.fn(() => ({
 				send: jest.fn().mockRejectedValue(new Error('Something bad happened.')),
@@ -40,7 +38,7 @@ describe('Log util - failure', () => {
 		})
 	})
 
-	it('should allow fail when saving a log', async () => {
+	it('Should allow fail when saving a log.', async () => {
 		const result = await saveLog(mockNewLog(), chance.name())
 
 		expect(result).toStrictEqual({
@@ -49,7 +47,7 @@ describe('Log util - failure', () => {
 		})
 	})
 
-	it('should allow fail when deleting a log', async () => {
+	it('Should allow fail when deleting a log.', async () => {
 		const result = await deleteLog(chance.natural())
 
 		expect(result).toStrictEqual({

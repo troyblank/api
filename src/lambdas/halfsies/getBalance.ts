@@ -1,6 +1,6 @@
 import { type APIGatewayProxyResult } from 'aws-lambda'
 import { type DatabaseResponse } from '../../types'
-import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
+import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants/responseCodes'
 import { getBalance } from './utils'
 
 export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolve) => {

@@ -8,9 +8,8 @@ jest.mock('@aws-sdk/client-dynamodb', () => ({
 }))
 
 jest.mock('@aws-sdk/lib-dynamodb', () => {
-	const originalModule = jest.requireActual('@aws-sdk/lib-dynamodb')
 	return {
-		...originalModule,
+		...jest.requireActual('@aws-sdk/lib-dynamodb'),
 		DynamoDBDocumentClient: {
 			from: jest.fn(() => ({
 				send: jest.fn().mockResolvedValue({ Items: [] }),
@@ -26,15 +25,15 @@ describe('Log util - success', () => {
 		process.env.halfsiesLogTableName = chance.word({ syllables: 4 })
 	})
 
-	it('should get logs', async () => {
+	it('Should get logs.', async () => {
 		expect(async () => await getLog()).not.toThrow()
 	})
 
-	it('should save a log', async () => {
+	it('Should save a log.', async () => {
 		expect(async () => await saveLog(mockNewLog(), chance.name())).not.toThrow()
 	})
 
-	it('should delete a log', async () => {
+	it('Should delete a log.', async () => {
 		expect(async () => await deleteLog(chance.natural())).not.toThrow()
 	})
 })
