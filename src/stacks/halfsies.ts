@@ -20,7 +20,7 @@ import { requiresAuthorization } from '../utils/auth'
 import { createTable } from '../utils/tables'
 import { addCorsOptions } from '../utils/apiGateway'
 
-const NODE_VERSION = Runtime.NODEJS_20_X
+const NODE_VERSION = Runtime.NODEJS_22_X
 
 // ----------------------------------------------------------------------------------------
 // WHEN DELETING THIS IN CLOUD FORMATION

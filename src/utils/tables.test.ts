@@ -20,6 +20,6 @@ describe('Table Utils', () => {
 
 		tables.createTable(createTableProps)
 
-		expect(tables.createTable).toBeCalledWith(createTableProps)
+		expect(tables.createTable).toHaveBeenCalledWith(createTableProps)
 	})
 })
