@@ -2,11 +2,11 @@ import { Chance } from 'chance'
 import { MAIN_USER_NAME } from '../../../config'
 import { HalfsieLog } from '../../types'
 import { mockApiGatewayProxyEvent, mockHalfsieLogs, mockNewLog } from '../../mocks'
-import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
+import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants/responseCodes'
 import { pruneLogs } from '../../utils/halfsies/log'
+import { getUserName } from '../utils/user'
 import {
 	getBalance,
-	getUserName,
 	saveLog,
 	updateBalance,
 } from './utils'
@@ -16,6 +16,7 @@ jest.mock('../../utils/halfsies/log', () => ({
 	...jest.requireActual('../../utils/halfsies/log'),
 	pruneLogs: jest.fn(),
 }))
+jest.mock('../utils/user')
 jest.mock('./utils')
 
 describe('Lambda - Create Halfsie', () => {
@@ -261,7 +262,7 @@ describe('Lambda - Create Halfsie', () => {
 		})
 	})
 
-	it('should return an error if there is a problem pruning the logs', async () => {
+	it('Should return an error if there is a problem pruning the logs.', async () => {
 		const errorMessage = chance.sentence()
 
 		jest.mocked(pruneLogs).mockResolvedValue({

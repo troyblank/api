@@ -1,5 +1,5 @@
 import { Chance } from 'chance'
-import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
+import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants/responseCodes'
 import { mockHalfsieLog } from '../../mocks'
 import { sortLogs } from '../../utils/halfsies/log'
 import { getLog } from './utils/log'
