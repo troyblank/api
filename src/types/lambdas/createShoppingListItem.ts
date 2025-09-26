@@ -1,7 +1,7 @@
 import { SHOPPING_ITEM_TYPE } from '../../constants/foodHow/shoppingListItem'
 
 export type ShoppingItemType = typeof SHOPPING_ITEM_TYPE[number];
-export type Store =  'Jewel-Osco' | 'Pete\'s' | 'Wild Fork'
+export type Store =  'Jewel-Osco' | 'Pete\'s' | 'Wild Fork' | 'Unspecified'
 
 export type ShoppingListItem = {
 	amount: number,

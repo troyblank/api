@@ -3,19 +3,17 @@ import { join } from 'path'
 import { Construct } from 'constructs'
 import { CustomResource, Stack } from 'aws-cdk-lib'
 import {
+	BasePathMapping,
 	CognitoUserPoolsAuthorizer,
 	LambdaIntegration,
 	Resource,
 	RestApi,
-	EndpointType,
-	DomainNameOptions,
 	type Authorizer,
 } from 'aws-cdk-lib/aws-apigateway'
-import { Certificate, ICertificate } from 'aws-cdk-lib/aws-certificatemanager'
 import { AttributeType, Table } from 'aws-cdk-lib/aws-dynamodb'
 import { Runtime } from 'aws-cdk-lib/aws-lambda'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
-import { HalfsiesStackProps } from '../types'
+import { HalfsiesStackProps } from '../types/stacks/halfsies'
 import { requiresAuthorization } from '../utils/auth'
 import { createTable } from '../utils/tables'
 import { addCorsOptions } from '../utils/apiGateway'
@@ -33,9 +31,8 @@ export class HalfsiesStack extends Stack {
 		super(scope, id, props)
 
 		const {
+			apiDomainName,
 			accessControlAllowOrigin,
-			customDomainCertificateARN,
-			customDomainName,
 			resourcePostFix = '',
 			userPool,
 		} = props
@@ -46,13 +43,13 @@ export class HalfsiesStack extends Stack {
 		// To get a custom domain working you must
 		// 1. Get a Certificate using AWS Certificate Manager (on us-east-1 ONLY) and add a DNS CNAME record from your domain provider.
 		// 2. Setup your domain provider's DNS Records CNAME record to add the "API Gateway domain name" with a period at the end (found in API Gateway > Custom domain names) 
-		const customDomainCertificate: ICertificate = Certificate.fromCertificateArn(this, 'domainCert', customDomainCertificateARN)
-		const customApiDomain: DomainNameOptions = {
-			domainName: customDomainName,
-			basePath: 'halfsies',
-			certificate: customDomainCertificate,
-			endpointType: EndpointType.EDGE,
-		}
+		// const customDomainCertificate: ICertificate = Certificate.fromCertificateArn(this, 'domainCert', customDomainCertificateARN)
+		// const customApiDomain: DomainNameOptions = {
+		// 	domainName: customDomainName,
+		// 	basePath: 'halfsies',
+		// 	certificate: customDomainCertificate,
+		// 	endpointType: EndpointType.EDGE,
+		// }
 
 		// ----------------------------------------------------------------------------------------
 		// DYNAMO DB
@@ -143,8 +140,13 @@ export class HalfsiesStack extends Stack {
 		// API GATEWAY
 		// ----------------------------------------------------------------------------------------
 		const api: RestApi = new RestApi(this, `halfsiesApi${resourcePostFix}`)
+		new BasePathMapping(this, `HalfsiesBasePathMapping${resourcePostFix}`, {
+			domainName: apiDomainName,
+			restApi: api,
+			basePath: 'halfsies',
+		})
 
-		api.addDomainName('ApiGatewayDomain', customApiDomain)
+		// api.addDomainName('ApiGatewayDomain', customApiDomain)
 
 		// create halfsie
 		const createHalfsieLambdaIntegration: LambdaIntegration = new LambdaIntegration(createHalfsie)
