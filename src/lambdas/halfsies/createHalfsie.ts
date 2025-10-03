@@ -1,11 +1,11 @@
 import { type APIGatewayProxyEvent, type APIGatewayProxyResult } from 'aws-lambda'
 import { type DatabaseResponse, type NewLog } from '../../types'
-import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants'
+import { RESPONSE_CODE_OK, RESPONSE_CODE_SERVER_ERROR } from '../../constants/responseCodes'
 import { isUserNameTheMainUserName } from '../../utils/halfsies/auth'
 import { isALog, pruneLogs } from '../../utils/halfsies/log'
+import { getUserName } from '../utils/user'
 import {
 	getBalance,
-	getUserName,
 	saveLog,
 	updateBalance,
 } from './utils'
@@ -28,7 +28,8 @@ export const handler = ({ body, headers }: APIGatewayProxyEvent): Promise<APIGat
 	if (!isALog(newLog)) {
 		result.statusCode = RESPONSE_CODE_SERVER_ERROR
 		result.body = JSON.stringify({ message: 'No log given to create.' })
-		resolve(result)
+
+		return resolve(result)
 	}
 
 	getBalance().then(({ data: currentBalance, isError: isGetBalanceError, errorMessage: getBalanceErrorMessage }: DatabaseResponse) => {
