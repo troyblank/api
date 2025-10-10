@@ -58,6 +58,17 @@ export class FoodHowStack extends Stack {
 			},
 		})
 
+		// const getShoppingList: NodejsFunction = new NodejsFunction(this, 'getShoppingList', {
+		// 	functionName: `foodHowGetShoppingList${resourcePostFix}`,
+		// 	entry: join(__dirname, '../lambdas', 'foodHow', 'getShoppingList.ts'),
+		// 	handler: 'handler',
+		// 	runtime: NODE_VERSION,
+		// 	environment: {
+		// 		accessControlAllowOrigin,
+		// 		shoppingListTableName: shoppingListDb.tableName,
+		// 	},
+		// })
+
 		// ----------------------------------------------------------------------------------------
 		// AUTHORIZATION
 		// ----------------------------------------------------------------------------------------
@@ -74,6 +85,11 @@ export class FoodHowStack extends Stack {
 			restApi: api,
 			basePath: 'foodhow',
 		})
+
+		// get shopping list items
+		// const getShoppingListItemLambdaIntegration: LambdaIntegration = new LambdaIntegration(createShoppingListItem)
+		// const createShoppingListItemLambdaResource: Resource = api.root.addResource('createShoppingListItem')
+
 
 		// create shopping list item
 		const createShoppingListItemLambdaIntegration: LambdaIntegration = new LambdaIntegration(createShoppingListItem)

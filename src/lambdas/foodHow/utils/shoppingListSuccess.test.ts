@@ -1,6 +1,6 @@
 import { Chance } from 'chance'
 import { mockShoppingListItem } from '../../../mocks'
-import { saveShoppingListItem } from './shoppingList'
+import { getShoppingList, saveShoppingListItem } from './shoppingList'
 
 jest.mock('@aws-sdk/client-dynamodb', () => ({
 	...jest.requireActual('@aws-sdk/client-dynamodb'),
@@ -23,6 +23,15 @@ describe('Shopping List Util - success', () => {
 
 	beforeEach(() => {
 		process.env.shoppingListTableName = chance.word({ syllables: 4 })
+	})
+
+	it('Should get the shopping list.', async () => {
+		const result = await getShoppingList()
+
+		expect(result).toStrictEqual({
+			data: [],
+			isError: false,
+		})
 	})
 
 	it('Should save a shopping list item.', async () => {
