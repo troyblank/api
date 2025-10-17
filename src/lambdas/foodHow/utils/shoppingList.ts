@@ -6,6 +6,7 @@ import {
 	type ScanCommandOutput,
 } from "@aws-sdk/lib-dynamodb"
 import { getErrorMessage } from '../../../utils/error'
+import { deleteItems } from '../../../utils/tables'	
 import { type DatabaseResponse } from '../../../types'
 import { type ShoppingListItem } from '../../../types/lambdas/foodHow'
 
@@ -46,6 +47,26 @@ export const saveShoppingListItem = async (item: ShoppingListItem, userName: str
 				user: userName,
 			},
 		}))
+
+		return {
+			isError: false,
+		}
+	} catch (error: unknown) {
+		return {
+			isError: true,
+			errorMessage: getErrorMessage(error),
+		}
+	}
+}
+
+export const deleteShoppingListItems = async (itemIds: number[]): Promise<DatabaseResponse> => {
+	const { shoppingListTableName } = process.env
+
+	try {
+		await deleteItems({
+			tableName: shoppingListTableName!,
+			keys: itemIds,
+		})
 
 		return {
 			isError: false,

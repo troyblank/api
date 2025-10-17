@@ -7,7 +7,7 @@ export const handler = (): Promise<APIGatewayProxyResult> => new Promise((resolv
 	const { accessControlAllowOrigin = '' } = process.env
 
 	const result: APIGatewayProxyResult = {
-		body: JSON.stringify({ message: 'Invalid state.', log: [] }),
+		body: JSON.stringify({ message: 'Invalid state.', shoppingList: [] }),
 		headers: {
 			'Access-Control-Allow-Origin': accessControlAllowOrigin,
 			'Content-Type': 'application/json',

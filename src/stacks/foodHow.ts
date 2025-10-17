@@ -69,6 +69,18 @@ export class FoodHowStack extends Stack {
 			},
 		})
 
+		// need to make unit tests for lambda then back to this...
+
+		// const deleteShoppingListItems: NodejsFunction = new NodejsFunction(this, 'deleteShoppingListItems', {
+		// 	functionName: `foodHowDeleteShoppingListItems${resourcePostFix}`,
+		// 	entry: join(__dirname, '../lambdas', 'foodHow', 'deleteShoppingListItems.ts'),
+		// 	handler: 'handler',
+		// 	runtime: NODE_VERSION,
+		// 	environment: {
+		// 		accessControlAllowOrigin,
+		// 		shoppingListTableName: shoppingListDb.tableName,
+		// 	},
+		// })
 		// ----------------------------------------------------------------------------------------
 		// AUTHORIZATION
 		// ----------------------------------------------------------------------------------------
