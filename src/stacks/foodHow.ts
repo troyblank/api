@@ -69,6 +69,16 @@ export class FoodHowStack extends Stack {
 			},
 		})
 
+		const deleteShoppingListItems: NodejsFunction = new NodejsFunction(this, 'deleteShoppingListItems', {
+			functionName: `foodHowDeleteShoppingListItems${resourcePostFix}`,
+			entry: join(__dirname, '../lambdas', 'foodHow', 'deleteShoppingListItems.ts'),
+			handler: 'handler',
+			runtime: NODE_VERSION,
+			environment: {
+				accessControlAllowOrigin,
+				shoppingListTableName: shoppingListDb.tableName,
+			},
+		})
 		// ----------------------------------------------------------------------------------------
 		// AUTHORIZATION
 		// ----------------------------------------------------------------------------------------
@@ -101,5 +111,13 @@ export class FoodHowStack extends Stack {
 		createShoppingListItemLambdaResource.addMethod('POST', createShoppingListItemLambdaIntegration, requiresAuthorization(authorizer))
 		shoppingListDb.grantReadWriteData(createShoppingListItem)
 		addCorsOptions(createShoppingListItemLambdaResource, accessControlAllowOrigin)
+
+		// delete shopping list items
+		const deleteShoppingListItemsLambdaIntegration: LambdaIntegration = new LambdaIntegration(deleteShoppingListItems)
+		const deleteShoppingListItemsLambdaResource: Resource = api.root.addResource('deleteShoppingListItems')
+
+		deleteShoppingListItemsLambdaResource.addMethod('DELETE', deleteShoppingListItemsLambdaIntegration, requiresAuthorization(authorizer))
+		shoppingListDb.grantReadWriteData(deleteShoppingListItems)
+		addCorsOptions(deleteShoppingListItemsLambdaResource, accessControlAllowOrigin)
 	}
 }
