@@ -1,6 +1,6 @@
 import { Chance } from 'chance'
 import { mockShoppingListItem } from '../../../mocks'
-import { getShoppingList, saveShoppingListItem } from './shoppingList'
+import { deleteShoppingListItems, getShoppingList, saveShoppingListItem } from './shoppingList'
 
 jest.mock('@aws-sdk/client-dynamodb', () => {
 	return {
@@ -40,6 +40,16 @@ describe('Shopping List Util - failure', () => {
 
 	it('Should allow fail when saving a shopping list item.', async () => {
 		const result = await saveShoppingListItem(mockShoppingListItem(), chance.name())
+
+		expect(result).toStrictEqual({
+			errorMessage: 'Something bad happened.',
+			isError: true,
+		})
+	})
+
+	it('Should allow fail when deleting a shopping list item.', async () => {
+		const keys = chance.unique(chance.integer, chance.integer({ min: 1, max: 100 }))
+		const result = await deleteShoppingListItems(keys)
 
 		expect(result).toStrictEqual({
 			errorMessage: 'Something bad happened.',
