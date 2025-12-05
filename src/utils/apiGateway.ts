@@ -10,7 +10,7 @@ export function addCorsOptions(resource: Resource, accessControlAllowOrigin: str
 					responseParameters: {
 						'method.response.header.Access-Control-Allow-Headers': `'Content-Type,X-Amz-Date,Authorization,X-Api-Key'`,
 						'method.response.header.Access-Control-Allow-Origin': `'${accessControlAllowOrigin}'`,
-						'method.response.header.Access-Control-Allow-Methods': `'GET,POST,OPTIONS'`,
+						'method.response.header.Access-Control-Allow-Methods': `'GET,POST,DELETE,OPTIONS'`,
 					},
 				},
 			],

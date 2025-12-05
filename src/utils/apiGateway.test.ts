@@ -33,7 +33,7 @@ describe('API Gateway Utils', () => {
 		expect(integrationProps.integrationResponses[0].responseParameters).toMatchObject({
 			'method.response.header.Access-Control-Allow-Headers': `'Content-Type,X-Amz-Date,Authorization,X-Api-Key'`,
 			'method.response.header.Access-Control-Allow-Origin': `'${origin}'`,
-			'method.response.header.Access-Control-Allow-Methods': `'GET,POST,OPTIONS'`,
+			'method.response.header.Access-Control-Allow-Methods': `'GET,POST,DELETE,OPTIONS'`,
 		})
 		expect(integrationProps.requestTemplates).toMatchObject({
 			'application/json': '{"statusCode": 200}',

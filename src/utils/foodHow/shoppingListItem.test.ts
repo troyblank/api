@@ -22,6 +22,10 @@ describe('Shopping List util', () => {
 
 	it('Should determine what is a shopping list item.', async () => {
 		expect(isAShoppingListItem(mockShoppingListItem())).toBe(true)
+		expect(isAShoppingListItem({
+			...mockShoppingListItem(),
+			recipe: chance.word(),
+		})).toBe(true)
 		expect(isAShoppingListItem(undefined)).toBe(false)
 		expect(isAShoppingListItem({
 			...mockShoppingListItem(),
@@ -34,6 +38,10 @@ describe('Shopping List util', () => {
 		expect(isAShoppingListItem({
 			...mockShoppingListItem(),
 			name: '',
+		})).toBe(false)
+		expect(isAShoppingListItem({
+			...mockShoppingListItem(),
+			recipe: chance.integer(),
 		})).toBe(false)
 		expect(isAShoppingListItem({
 			...mockShoppingListItem(),

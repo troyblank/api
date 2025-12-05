@@ -6,6 +6,7 @@ export type ShoppingItemStore = typeof SHOPPING_ITEM_STORE[number];
 export type ShoppingListItem = {
 	amount: number,
 	name: string,
+	store: ShoppingItemStore,
+	recipe?: string,
 	type: ShoppingItemType,
-	store: ShoppingItemStore,	
 }
