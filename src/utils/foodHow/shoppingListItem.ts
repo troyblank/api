@@ -12,12 +12,12 @@ export const isAShoppingItemStore = (shoppingItemStore: any): boolean => {
 }
 
 export const isAShoppingListItem = (shoppingListItem: any): boolean => {
-	const { amount, name, recipe, type, store } = shoppingListItem || {}
+	const { amount, name, purpose, type, store } = shoppingListItem || {}
 
 	return (
 		typeof amount === 'number' &&
 		typeof name === 'string' && name.length > 0 &&
-		(recipe === undefined || typeof recipe === 'string') &&
+		(purpose === undefined || typeof purpose === 'string') &&
 		isAShoppingItemType(type) &&
 		isAShoppingItemStore(store)
 	)
