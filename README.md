@@ -18,8 +18,9 @@ AWS credentials needs to be configured before you can run any CDK commands, do t
 2. run `yarn install`
 
 # Commands
-| Command     | Result |
-| ----------- | ----------- |
+| Command         | Result                                                       |
+| --------------- | -------------------------------------------------------- |
+| yarn test       | runs all linting and unit tests                          |
 | yarn bootstrap  | anytime you update aws-cdk you must boostrap the project |
 | yarn synth      | synthesizes stack to check for errors before deploying   |
 | yarn deploy     | deploys couldformation stack to AWS                      |

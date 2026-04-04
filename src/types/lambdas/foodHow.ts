@@ -7,6 +7,6 @@ export type ShoppingListItem = {
 	amount: number,
 	name: string,
 	store: ShoppingItemStore,
-	recipe?: string,
+	purpose?: string,
 	type: ShoppingItemType,
 }

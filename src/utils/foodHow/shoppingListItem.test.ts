@@ -24,7 +24,7 @@ describe('Shopping List util', () => {
 		expect(isAShoppingListItem(mockShoppingListItem())).toBe(true)
 		expect(isAShoppingListItem({
 			...mockShoppingListItem(),
-			recipe: chance.word(),
+			purpose: chance.word(),
 		})).toBe(true)
 		expect(isAShoppingListItem(undefined)).toBe(false)
 		expect(isAShoppingListItem({
@@ -41,7 +41,7 @@ describe('Shopping List util', () => {
 		})).toBe(false)
 		expect(isAShoppingListItem({
 			...mockShoppingListItem(),
-			recipe: chance.integer(),
+			purpose: chance.integer(),
 		})).toBe(false)
 		expect(isAShoppingListItem({
 			...mockShoppingListItem(),
