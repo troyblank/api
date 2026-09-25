@@ -44,6 +44,12 @@ export class FoodHowStack extends Stack {
 			stack: this,
 			type: AttributeType.NUMBER,
 		})
+		const shoppingListLegendDb: Table = createTable({
+			name: `foodHowShoppingListLegend${resourcePostFix}`,
+			primaryKey: 'id',
+			stack: this,
+			type: AttributeType.NUMBER,
+		})
 		// ----------------------------------------------------------------------------------------
 		// LAMBDAS
 		// ----------------------------------------------------------------------------------------		
@@ -77,6 +83,39 @@ export class FoodHowStack extends Stack {
 			environment: {
 				accessControlAllowOrigin,
 				shoppingListTableName: shoppingListDb.tableName,
+			},
+		})
+
+		const getShoppingListLegend: NodejsFunction = new NodejsFunction(this, 'getShoppingListLegend', {
+			functionName: `foodHowGetShoppingListLegend${resourcePostFix}`,
+			entry: join(__dirname, '../lambdas', 'foodHow', 'getShoppingListLegend.ts'),
+			handler: 'handler',
+			runtime: NODE_VERSION,
+			environment: {
+				accessControlAllowOrigin,
+				shoppingListLegendTableName: shoppingListLegendDb.tableName,
+			},
+		})
+
+		const saveShoppingListLegendItem: NodejsFunction = new NodejsFunction(this, 'saveShoppingListLegendItem', {
+			functionName: `foodHowSaveShoppingListLegendItem${resourcePostFix}`,
+			entry: join(__dirname, '../lambdas', 'foodHow', 'saveShoppingListLegendItem.ts'),
+			handler: 'handler',
+			runtime: NODE_VERSION,
+			environment: {
+				accessControlAllowOrigin,
+				shoppingListLegendTableName: shoppingListLegendDb.tableName,
+			},
+		})
+
+		const deleteShoppingListLegendItem: NodejsFunction = new NodejsFunction(this, 'deleteShoppingListLegendItem', {
+			functionName: `foodHowDeleteShoppingListLegendItem${resourcePostFix}`,
+			entry: join(__dirname, '../lambdas', 'foodHow', 'deleteShoppingListLegendItem.ts'),
+			handler: 'handler',
+			runtime: NODE_VERSION,
+			environment: {
+				accessControlAllowOrigin,
+				shoppingListLegendTableName: shoppingListLegendDb.tableName,
 			},
 		})
 		// ----------------------------------------------------------------------------------------
@@ -119,5 +158,29 @@ export class FoodHowStack extends Stack {
 		deleteShoppingListItemsLambdaResource.addMethod('DELETE', deleteShoppingListItemsLambdaIntegration, requiresAuthorization(authorizer))
 		shoppingListDb.grantReadWriteData(deleteShoppingListItems)
 		addCorsOptions(deleteShoppingListItemsLambdaResource, accessControlAllowOrigin)
+
+		// get shopping list legend
+		const getShoppingListLegendLambdaIntegration: LambdaIntegration = new LambdaIntegration(getShoppingListLegend)
+		const getShoppingListLegendLambdaResource: Resource = api.root.addResource('getShoppingListLegend')
+
+		getShoppingListLegendLambdaResource.addMethod('GET', getShoppingListLegendLambdaIntegration, requiresAuthorization(authorizer))
+		shoppingListLegendDb.grantReadWriteData(getShoppingListLegend)
+		addCorsOptions(getShoppingListLegendLambdaResource, accessControlAllowOrigin)
+
+		// save shopping list legend item
+		const saveShoppingListLegendItemLambdaIntegration: LambdaIntegration = new LambdaIntegration(saveShoppingListLegendItem)
+		const saveShoppingListLegendItemLambdaResource: Resource = api.root.addResource('saveShoppingListLegendItem')
+
+		saveShoppingListLegendItemLambdaResource.addMethod('POST', saveShoppingListLegendItemLambdaIntegration, requiresAuthorization(authorizer))
+		shoppingListLegendDb.grantReadWriteData(saveShoppingListLegendItem)
+		addCorsOptions(saveShoppingListLegendItemLambdaResource, accessControlAllowOrigin)
+
+		// delete one shopping list legend item
+		const deleteShoppingListLegendItemLambdaIntegration: LambdaIntegration = new LambdaIntegration(deleteShoppingListLegendItem)
+		const deleteShoppingListLegendItemLambdaResource: Resource = api.root.addResource('deleteShoppingListLegendItem')
+
+		deleteShoppingListLegendItemLambdaResource.addMethod('DELETE', deleteShoppingListLegendItemLambdaIntegration, requiresAuthorization(authorizer))
+		shoppingListLegendDb.grantReadWriteData(deleteShoppingListLegendItem)
+		addCorsOptions(deleteShoppingListLegendItemLambdaResource, accessControlAllowOrigin)
 	}
 }
