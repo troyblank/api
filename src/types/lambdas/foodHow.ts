@@ -10,3 +10,13 @@ export type ShoppingListItem = {
 	purpose?: string,
 	type: ShoppingItemType,
 }
+
+export type ShoppingListLegendItem = {
+	emoji: string,
+	name: string,
+}
+
+export type SavedShoppingListLegendItem = ShoppingListLegendItem & {
+	id: number,
+	user: string,
+}
